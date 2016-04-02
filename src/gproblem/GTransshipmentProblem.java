@@ -19,12 +19,9 @@
 package gproblem;
 
 import java.util.Arrays;
-import java.util.Random;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 import gio.FichierEntree;
-import gio.FichierSortie;
 
 /**
  * 
