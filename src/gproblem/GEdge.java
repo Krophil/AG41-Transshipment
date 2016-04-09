@@ -42,15 +42,25 @@ public class GEdge {
 	 */
 	private GNode startingNode, endingNode ;
 
-	public GEdge(int edgeind, GNode nodei, GNode nodej, int edgeu, int edgec,
-			int edgeh, int edget) {
+	/**
+	 * 
+	 * @param edgeind
+	 * @param nodei : startingNode
+	 * @param nodej : endingNode
+	 * @param edgeu : u_capacity
+	 * @param fixedcost : c_fixedCost
+	 * @param unitcost : h_unitCost
+	 * @param transptime : t_time
+	 */
+	public GEdge(int edgeind, GNode nodei, GNode nodej, int edgeu, double fixedcost,
+			double unitcost, double transptime) {
 		indice = edgeind ;
 		startingNode = nodei ;
 		endingNode = nodej ;
 		u_capacity = edgeu ;
-		c_fixedCost = edgec ;
-		h_unitCost = edgeh ;
-		t_time = edget ;
+		c_fixedCost = fixedcost ;
+		h_unitCost = unitcost ;
+		t_time = transptime ;
 	}
 
 	/**

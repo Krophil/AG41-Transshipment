@@ -182,9 +182,11 @@ public abstract class GSolver extends Thread {
 
 	@Override
 	public void run() {
+		System.out.println("Gsolver.run(): solvingTime="+solvingTime) ;
 		thread = this ;
 		startTime = new Date().getTime() ; 
 		if (solvingTime>0) this.new GStopSolver().start() ;
+		System.out.println("calling solve()") ;
 		solve() ;
 	}
 

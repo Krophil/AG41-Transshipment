@@ -56,15 +56,22 @@ public class GNode {
 	
 	
 	
-
-	public GNode(int nodeind, int nodex, int nodey, int nodeb, int nodeg,
-			int nodes) {
+	/**
+	 * 
+	 * @param nodeind
+	 * @param nodex : int x
+	 * @param nodey : int y 
+	 * @param nodeb : int demand
+	 * @param unitcost : double cost
+	 * @param setup : double time
+	 */
+	public GNode(int nodeind, int nodex, int nodey, int nodeb, double unitcost, double setup) {
 		indice = nodeind ;
 		x = nodex ;
 		y = nodey ;
 		b_demand = nodeb ;
-		g_cost = nodeg ;
-		s_time = nodes ;
+		g_cost = unitcost ;
+		s_time = setup ;
 		tabEdges = null ;
 	}
 
@@ -196,7 +203,7 @@ public class GNode {
 
 	/**
 	 * 
-	 * @param
+	 * @param n
 	 */
 	public int getNbrEdges() {
 		return tabEdges.length ;		

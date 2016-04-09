@@ -1,0 +1,1 @@
+glpsol --math mod/prog-transshipment.mod --data $1 

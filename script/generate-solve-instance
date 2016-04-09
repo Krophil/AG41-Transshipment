@@ -1,0 +1,2 @@
+script/run -g data/random-instance.txt 100
+glpsol --math mod/prog-transshipment.mod --data data/random-instance.txt.dat

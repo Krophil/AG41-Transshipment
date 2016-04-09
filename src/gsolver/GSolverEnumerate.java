@@ -75,7 +75,9 @@ public class GSolverEnumerate extends GSolver {
 	/* (non-Javadoc)
 	 * @see gsolver.GSolver#solve()
 	 */
-	protected void solve() {
+	public void solve() {
+		System.out.println("solve") ;
+		
 		tabDepots = buildTabDepots() ;
 		tabPlatforms = buildTabPlatforms() ;
 		tabClients = buildTabClients() ;

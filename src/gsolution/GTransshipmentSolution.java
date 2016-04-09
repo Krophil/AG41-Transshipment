@@ -57,7 +57,7 @@ public class GTransshipmentSolution {
 
 	/**
 	 * 
-	 *
+	 * @param gTransshipmentSolution
 	 */
 	public GTransshipmentSolution(GTransshipmentSolution sol) {
 		problem = sol.problem ;
