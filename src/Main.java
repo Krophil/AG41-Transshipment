@@ -159,7 +159,6 @@ public class Main {
 		System.out.println ("commandGenerateInstance") ;
 		GTransshipmentProblem pb=GTransshipmentProblem.getRandomInstance(n) ;
 		pb.save(filename) ;
-		pb.saveGmpl(filename) ;
 
 	}
 

@@ -136,6 +136,36 @@ public class GTransshipmentSolution {
 
 
 	/**
+	 * Check if the total demand of the clients is satisfied
+	 * @return
+	 */
+	public boolean isClientDemandSatisfied() {
+		
+		// Look for clients demand
+		for (int i=0;i<problem.getNbrNodes();i++) {
+			GNode node=problem.getNode(i) ;
+			// if it is a client
+			if (node.getDemand()>0) {
+				// How many products reaches the client
+				int qty = 0 ;
+				for (GEdge edge: problem.getTabEdges()) {
+					if (edge.getEndingNode()==node)
+						qty += tabAssignment[edge.getIndice()] ;
+				}
+				if (qty!=node.getDemand()) {
+					return false; 
+				}
+			}
+		}
+
+		return true;
+	}
+
+	
+	
+	
+	
+	/**
 	 * Evaluation of a solution
 	 * @return
 	 */

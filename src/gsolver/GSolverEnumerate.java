@@ -167,6 +167,10 @@ public class GSolverEnumerate extends GSolver {
 		
 		// Test if solution is finished
 		if (key==KEY_PLATFORM && indiceTab>=tabPlatforms.length) {
+			// Bug v0.03 : If client demand is not satisfied, the solution is not feasible
+			if (!currentSolution.isClientDemandSatisfied()) 
+				return ;
+			
 			double eval = currentSolution.evaluate() ;
 //System.out.println("evaluation of full currentSolution="+currentSolution) ;
 //System.exit(0) ;
@@ -234,7 +238,9 @@ System.out.println("eval="+eval+" ; bestSolution.getEvaluation()="+bestSolution.
 				do {
 					int edgeIndice = currentNode.getEdgeIndice(startEdge) ; 
 					int qty = currentSolution.getAssignement(edgeIndice)+1 ;
-					if ( qty > nodeDemand ) {
+					int capa = problem.getEdgeFromIndice(edgeIndice).getCapacity() ;
+
+					if ( qty > nodeDemand  || qty > capa) {
 						currentSolution.setAssignement(edgeIndice, 0) ;						
 						startEdge++ ;
 						if (startEdge>=currentNode.getNbrEdges()-1) { // All possible assignment have been considered for currentNode

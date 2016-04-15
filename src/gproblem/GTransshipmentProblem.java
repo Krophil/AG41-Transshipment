@@ -33,7 +33,7 @@ import gio.FichierSortie;
  * Transshipment problem for the challenge AG41 of spring 2016
  * 
  * @author Olivier Grunder
- * @version 0.01
+ * @version 0.03
  * @date 7 march 2016
  *
  */
@@ -134,15 +134,14 @@ public class GTransshipmentProblem {
 		int nresid = n ;
 		int nmin = Math.max( (int)(Math.round(nresid/3.0 * 0.8)), 1) ; 
 		int nmax = Math.max( (int)(Math.round(nresid/3.0 * 1.2)), nmin)  ;
-
-		int nbrDepot = rand.nextInt(nmax-nmin)+nmin ;
-		if (nbrDepot<1) nbrDepot = 1 ;
+		int nbrDepot = rand.nextInt(nmax-nmin+1)+nmin ;
+		if (nbrDepot<2) nbrDepot = 2 ;
 		
 		nresid -= nbrDepot;
 		nmin = Math.min( (int) (nresid/2.0 * 0.8), 1) ; 
 		nmax = Math.max( (int) (nresid/2.0 * 1.2), nmin)  ;
-		int nbrPlatform = rand.nextInt(nmax-nmin)+nmin ;
-		if (nbrPlatform<1) nbrPlatform = 1 ;
+		int nbrPlatform = rand.nextInt(nmax-nmin+1)+nmin ;
+		if (nbrPlatform<2) nbrPlatform = 2 ;
 
 		int nbrClient = nresid - nbrPlatform ;
 		
@@ -348,13 +347,14 @@ public class GTransshipmentProblem {
 		fs.ecrire("# c_ij : fixed cost for the use of (i,j)\n") ;
 		fs.ecrire("# h_ij : unit cost for (i,j)\n") ;
 		fs.ecrire("# t_ij : delivery time for (i,j)\n") ;
-		fs.ecrire("EOF\n") ;
 		
 		for (int iedge=0;iedge<getNbrEdges();iedge++) {
 			GEdge edge = getEdge(iedge) ;
 			fs.ecrire(TOKEN_EDGE+": "+edge.getIndice()+" "+edge.getStartingNode().getIndice()+" "+edge.getEndingNode().getIndice()+" "+edge.getCapacity()+" "+edge.getFixedCost()+" "+edge.getUnitCost()+" "+edge.getTime()+"\n") ;
 		}
 
+		// Bug v0.03
+		fs.ecrire("EOF\n") ;
 		fs.fermer() ;
 
 	}
@@ -575,8 +575,9 @@ public class GTransshipmentProblem {
 					int nodex = Integer.parseInt(st2.nextToken().trim()) ;
 					int nodey = Integer.parseInt(st2.nextToken().trim()) ; 
 					int nodeb = Integer.parseInt(st2.nextToken().trim()) ; 
-					int nodeg = Integer.parseInt(st2.nextToken().trim()) ;
-					int nodes = Integer.parseInt(st2.nextToken().trim()) ;
+					// Bug v0.03
+					double nodeg = Double.parseDouble(st2.nextToken().trim()) ;
+					double nodes = Double.parseDouble(st2.nextToken().trim()) ;
 					
 					tabNodes[itabnodes++] = new GNode(nodeind, nodex, nodey, nodeb, nodeg, nodes) ;
 				}
@@ -598,9 +599,10 @@ public class GTransshipmentProblem {
 						printParsingError ("node with indice "+edgej+" does not exist in "+problemFilename+", line "+lineNumber) ;
 					
 					int edgeu = Integer.parseInt(st2.nextToken().trim()) ;
-					int edgec = Integer.parseInt(st2.nextToken().trim()) ; 
-					int edgeh = Integer.parseInt(st2.nextToken().trim()) ; 
-					int edget = Integer.parseInt(st2.nextToken().trim()) ;
+					// Bug v0.03
+					double edgec = Double.parseDouble(st2.nextToken().trim()) ; 
+					double edgeh = Double.parseDouble(st2.nextToken().trim()) ; 
+					double edget = Double.parseDouble(st2.nextToken().trim()) ;
 					
 					tabEdges[itabedges++] = new GEdge(edgeind, nodei, nodej, edgeu, edgec, edgeh, edget) ;
 				}
@@ -743,7 +745,22 @@ public class GTransshipmentProblem {
 	}
 
 
-	
+	/**
+	 * Return an edge from its data indice 
+	 * the data indice is the indice of the edge in the data file
+	 * 
+	 * @param edgeIndice
+	 * @return
+	 */
+	public GEdge getEdgeFromIndice(int edgeIndice) {
+		for (int i=0;i<tabEdges.length;i++) {
+			if (tabEdges[i].getIndice()==edgeIndice)
+				return tabEdges[i] ;
+		}
+		return null;
+	}
+
+
 
 
 }
