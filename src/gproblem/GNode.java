@@ -241,6 +241,8 @@ public class GNode {
 		return tabEdges;
 	}
 
+	public void setTabEdges(int nbEdges) { tabEdges = new GEdge[nbEdges]; }
+
 	public boolean isDepot() {
 		return b_demand<0;
 	}
