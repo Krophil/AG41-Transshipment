@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export ROOT_DIR=..
+export ROOT_DIR=.
 export CLASS_DIR=$ROOT_DIR/src
 export CLASSPATH=$CLASS_DIR
 
