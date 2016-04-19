@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export ROOT_DIR=.
-export CLASS_DIR=$ROOT_DIR/src
+export CLASS_DIR=$ROOT_DIR/out
 export CLASSPATH=$CLASS_DIR
 
 echo java -ea -Xms512m -Xmx2048m Main $1 $2 $3 $4 $5 $6 $7 $8 $9

@@ -42,6 +42,8 @@ public class Main {
 	final static String OPTION_GENERATE_SHORT = "-g" ;
 	final static String OPTION_GENERATE_LONG  = "--generate" ;
 
+	final static String OPTION_SOLVE_SHORT = "-s";
+	final static String OPTION_SOLVE_LONG = "--solve";
 	// challenge file names
 	public static final String[] challengeFilenames = {
 		"data/transshipment1.txt",
@@ -131,6 +133,16 @@ public class Main {
 		}
 	}
 
+	private static void commandMySolver(String filename) {
+		System.out.println("commandMySolver");
+		GTransshipmentProblem pb = getProblem(filename);
+		if(pb!=null) {
+			System.out.println("pb!=null");
+			MySolver solv = new MySolver(pb);
+			System.out.println("solv.start");
+			solv.solve();
+		}
+	}
 
 	/**
 	 *
@@ -216,6 +228,17 @@ public class Main {
     				else 
     					System.out.println("Problem filename missing") ;
     			}
+				else if(args[p].equalsIgnoreCase(OPTION_SOLVE_SHORT) || args[p].equalsIgnoreCase(OPTION_SOLVE_LONG)) {
+					String filename = null ;
+					if(p+1<args.length) {
+						filename = args[++p];
+						commandMySolver(filename);
+
+						System.exit(0);
+					}
+					else
+						System.out.println("Problem filename missing");
+				}
     			else {
     				System.out.println("Argument line error : args["+p+"]="+args[p]+"") ;
     				

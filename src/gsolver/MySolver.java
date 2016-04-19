@@ -39,12 +39,16 @@ import gsolver.GSolver;
 public class MySolver extends GSolver {
 	
 	ArrayList<GNode> clients;
+	ArrayList<GNode> platforms;
+	ArrayList<GNode> depots;
 	/**
 	 * 
 	 */
 	public MySolver() {
 		super();
 		clients = new ArrayList<GNode>();
+		platforms = new ArrayList<GNode>();
+		depots = new ArrayList<GNode>();
 	}
 
 	/**
@@ -60,11 +64,15 @@ public class MySolver extends GSolver {
 	/* (non-Javadoc)
 	 * @see gsolver.GSolver#solve()
 	 */
-	protected void solve() {
+	public void solve() {
 		System.out.println("This is mysolver...") ;
 		System.out.println("Génération des clients");
 		buildClients(problem);
+		buildPlatforms(problem);
+		buildDepots(problem);
 		System.out.println(clients);
+		System.out.println(platforms);
+		System.out.println(depots);
 		bestSolution = null ;
 		currentSolution = null ;
 	}
@@ -77,5 +85,25 @@ public class MySolver extends GSolver {
 			}
 		}
 		this.clients = newClients;
+	}
+
+	private void buildPlatforms(GTransshipmentProblem pb) {
+		ArrayList<GNode> newPlatforms =new ArrayList<>();
+		for (GNode node : pb.getTabNodes()){
+			if(node.getDemand() == 0){
+				newPlatforms.add(node);
+			}
+		}
+		this.platforms = newPlatforms;
+	}
+
+	private void buildDepots(GTransshipmentProblem pb) {
+		ArrayList<GNode> newDepots =new ArrayList<>();
+		for (GNode node : pb.getTabNodes()){
+			if(node.getDemand() < 0){
+				newDepots.add(node);
+			}
+		}
+		this.depots = newDepots;
 	}
 }
