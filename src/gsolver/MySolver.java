@@ -18,6 +18,7 @@
  */
 package gsolver;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.swing.text.TabableView;
@@ -37,12 +38,13 @@ import gsolver.GSolver;
  */
 public class MySolver extends GSolver {
 	
-
+	ArrayList<GNode> clients;
 	/**
 	 * 
 	 */
 	public MySolver() {
 		super();
+		clients = new ArrayList<GNode>();
 	}
 
 	/**
@@ -60,8 +62,20 @@ public class MySolver extends GSolver {
 	 */
 	protected void solve() {
 		System.out.println("This is mysolver...") ;
+		System.out.println("Génération des clients");
+		buildClients(problem);
+		System.out.println(clients);
 		bestSolution = null ;
 		currentSolution = null ;
 	}
 
+	private void buildClients(GTransshipmentProblem pb) {
+		ArrayList<GNode> newClients =new ArrayList<>();
+		for (GNode node : pb.getTabNodes()){
+			if(node.getDemand() > 0){
+				newClients.add(node);
+			}
+		}
+		this.clients = newClients;
+	}
 }
