@@ -166,7 +166,7 @@ public class GEdge {
 	 */
 	@Override
 	public String toString() {
-		return "GEdge ("+startingNode.getIndice()+","+endingNode.getIndice()+") [u=" + u_capacity
+		return "GEdge ("+getIndice()+","+startingNode.getIndice()+","+endingNode.getIndice()+") [u=" + u_capacity
 				+ ", c=" + c_fixedCost + ", h=" + h_unitCost
 				+ ", t=" + t_time + "]\n";
 	}

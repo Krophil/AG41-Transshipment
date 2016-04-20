@@ -115,8 +115,8 @@ public class MySolver extends GSolver {
 		ArrayList<GNode> newPlt = new ArrayList<>();
 		for(GNode n : problem.getTabNodes()) {
 			/*
-			 * for every platform, it creates two secondary
-			 * platforms (mini-platform) and adds them to
+			 * for every platform, it creates the secondary
+			 * platform (mini-platform) directed from depots and adds it to
 			 * newPlt
 			 */
 			if(n.getDemand()==0){
@@ -147,12 +147,12 @@ public class MySolver extends GSolver {
 		 */
 		for(GNode n : newPlt){
 				for (GNode d : depots)
-					newEd.add(new GEdge(problem.getNbrEdges() + n.getIndice(), d, n, 100000, problem.getNode((n.getIndice() - problem.getNbrNodes() * 10) / problem.getNbrNodes()).getCost(), 0, 0));
+					newEd.add(new GEdge(n.getIndice()*problem.getNbrNodes() + d.getIndice(), d, n, 100000, problem.getNode((n.getIndice() - problem.getNbrNodes() * 10) / problem.getNbrNodes()).getCost(), 0, 0));
 		}
 		for(GNode n : problem.getTabNodes()) {
 			/*
-			 * for every platform, it creates two secondary
-			 * platforms (mini-platform) and adds them to
+			 * for every platform, it creates the secondary
+			 * platform (mini-platform) directed to clients and adds it to
 			 * newPlt
 			 */
 			if (n.getDemand() == 0) {
@@ -161,6 +161,17 @@ public class MySolver extends GSolver {
 				}
 			}
 		}
+
+		for (GNode n : newPlt) {
+			int i = 0;/*i introduced to avoid edge built from first platforms to clients*/
+			for(GNode d : clients){
+				if(i > 2) {
+					newEd.add(new GEdge(n.getIndice() * problem.getNbrNodes() + d.getIndice(), n, d, 100000, problem.getNode(i+(n.getIndice() - problem.getNbrNodes() * 10) / problem.getNbrNodes()).getCost(), 0, 0));
+				}
+				i++;
+			}
+		}
+
 		System.out.println("test\n"+newPlt);
 		System.out.println(newEd);
 	}
