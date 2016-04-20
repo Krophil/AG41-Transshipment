@@ -165,8 +165,9 @@ public class MySolver extends GSolver {
 		for (GNode n : newPlt) {
 			int i = 0;/*i introduced to avoid edge built from first platforms to clients*/
 			for(GNode d : clients){
-				if(i > 2) {
-					newEd.add(new GEdge(n.getIndice() * problem.getNbrNodes() + d.getIndice(), n, d, 100000, problem.getNode(i+(n.getIndice() - problem.getNbrNodes() * 10) / problem.getNbrNodes()).getCost(), 0, 0));
+				System.out.print(n.getIndice() + ", ");
+				if(n.getIndice()-problem.getNbrNodes()*10>clients.size()+platforms.size()) {
+					newEd.add(new GEdge(n.getIndice() * problem.getNbrNodes() + d.getIndice(), n, d, 100000, problem.getNode((n.getIndice() - problem.getNbrNodes() * 10) / problem.getNbrNodes()).getCost(), 0, 0));
 				}
 				i++;
 			}
