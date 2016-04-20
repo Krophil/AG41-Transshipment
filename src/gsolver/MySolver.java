@@ -18,6 +18,7 @@
  */
 package gsolver;
 
+import java.lang.reflect.GenericArrayType;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -120,32 +121,41 @@ public class MySolver extends GSolver {
 			 */
 			if(n.getDemand()==0){
 				for (int i = 0; i < this.depots.size(); i++) {
-					newPlt.add(new GNode(problem.getNbrNodes()+n.getIndice()+i, 0, 0, 0, 0, 0));
+					newPlt.add(new GNode(problem.getNbrNodes()*10+n.getIndice()*problem.getNbrNodes()+i, 0, 0, 0, 0, 0));
 				}
 				for (int i = 0; i < this.clients.size(); i++) {
-					newPlt.add(new GNode(problem.getNbrNodes()+n.getIndice()+depots.size()+i, 0, 0, 0, 0, 0));
+					newPlt.add(new GNode(problem.getNbrNodes()*10+n.getIndice()*problem.getNbrNodes()+depots.size()+i, 0, 0, 0, 0, 0));
 				}
 			}
 		}
 		System.out.println("test\n"+newPlt);
 		ArrayList<GEdge> newEd = new ArrayList<>();
-		for(GEdge e: problem.getTabEdges()) {
-			/*
-			 * used to detect every edge ending to a
-			 * platform and create a secondary edge to the
-			 * corresponding mini-platform and adds them
-			 * to newEd
-			 */
+		/*for(GEdge e: problem.getTabEdges()) {
+
 			if (platforms.contains(e.getEndingNode())) {
 				newEd.add(new GEdge(problem.getNbrEdges()+e.getIndice(), e.getStartingNode(), newPlt.get(e.getEndingNode().getIndice()+problem.getNbrNodes()), e.getCapacity(), e.getEndingNode().getCost(), 0, 0));
 			}
-		}
+		}*/
 
-		for(GEdge e: problem.getTabEdges()) {
+		/*for(GEdge e: problem.getTabEdges()) {
 			if (platforms.contains(e.getStartingNode())) {
 				newEd.add(new GEdge(problem.getNbrEdges() + e.getIndice(),newPlt.get(e.getStartingNode().getIndice() + problem.getNbrNodes()+depots.size()),  e.getEndingNode(), e.getCapacity(), e.getEndingNode().getCost(), 0, 0));
 			}
+		}*/
+		/*
+		 * used to detect every edge ending to a
+		 * platform and create a secondary edge to the
+		 * corresponding mini-platform and adds them
+		 * to newEd
+		 */
+		int i=0;
+		for(GNode n : newPlt){
+			if(i<depots.size()) {
+				for (GNode d : depots)
+					newEd.add(new GEdge(problem.getNbrEdges() + n.getIndice(), d, n, 100000, problem.getNode((n.getIndice() - problem.getNbrNodes() * 10) / problem.getNbrNodes()).getCost(), 0, 0));
+			}
+			i++;
 		}
-		System.out.println("\n\n"+newEd);
+		System.out.println(newEd);
 	}
 }
