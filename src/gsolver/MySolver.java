@@ -125,23 +125,12 @@ public class MySolver extends GSolver {
 				}
 			}
 		}
-		System.out.println("test\n"+newPlt);
 		ArrayList<GEdge> newEd = new ArrayList<>();
-		/*for(GEdge e: problem.getTabEdges()) {
 
-			if (platforms.contains(e.getEndingNode())) {
-				newEd.add(new GEdge(problem.getNbrEdges()+e.getIndice(), e.getStartingNode(), newPlt.get(e.getEndingNode().getIndice()+problem.getNbrNodes()), e.getCapacity(), e.getEndingNode().getCost(), 0, 0));
-			}
-		}*/
 
-		/*for(GEdge e: problem.getTabEdges()) {
-			if (platforms.contains(e.getStartingNode())) {
-				newEd.add(new GEdge(problem.getNbrEdges() + e.getIndice(),newPlt.get(e.getStartingNode().getIndice() + problem.getNbrNodes()+depots.size()),  e.getEndingNode(), e.getCapacity(), e.getEndingNode().getCost(), 0, 0));
-			}
-		}*/
 		/*
 		 * used to detect every edge ending to a
-		 * platform and create a secondary edge to the
+		 * platform and create a secondary edge from depots to the
 		 * corresponding mini-platform and adds them
 		 * to newEd
 		 */
@@ -149,12 +138,14 @@ public class MySolver extends GSolver {
 				for (GNode d : depots)
 					newEd.add(new GEdge(n.getIndice()*problem.getNbrNodes() + d.getIndice(), d, n, 100000, problem.getNode((n.getIndice() - problem.getNbrNodes() * 10) / problem.getNbrNodes()).getCost(), 0, 0));
 		}
+
+		/*
+		 * for every platform, it creates the secondary
+		 * platform (mini-platform) directed to clients and adds it to
+		 * newPlt
+		 */
 		for(GNode n : problem.getTabNodes()) {
-			/*
-			 * for every platform, it creates the secondary
-			 * platform (mini-platform) directed to clients and adds it to
-			 * newPlt
-			 */
+
 			if (n.getDemand() == 0) {
 				for (int i = 0; i < this.clients.size(); i++) {
 					newPlt.add(new GNode(problem.getNbrNodes() * 10 + n.getIndice() * problem.getNbrNodes() + depots.size() + i, 0, 0, 0, 0, 0));
@@ -162,18 +153,32 @@ public class MySolver extends GSolver {
 			}
 		}
 
+		/*
+		 * Edges from platforms to clients
+		 */
 		for (GNode n : newPlt) {
-			int i = 0;/*i introduced to avoid edge built from first platforms to clients*/
 			for(GNode d : clients){
-				System.out.print(n.getIndice() + ", ");
-				if(n.getIndice()-problem.getNbrNodes()*10>clients.size()+platforms.size()) {
-					newEd.add(new GEdge(n.getIndice() * problem.getNbrNodes() + d.getIndice(), n, d, 100000, problem.getNode((n.getIndice() - problem.getNbrNodes() * 10) / problem.getNbrNodes()).getCost(), 0, 0));
-				}
-				i++;
+				if(n.getIndice()-problem.getNbrNodes()*10 > clients.size()+platforms.size())
+					newEd.add(new GEdge(n.getIndice() * problem.getNbrNodes() + d.getIndice(), n, d, 100000, problem.getNode(((n.getIndice() - problem.getNbrNodes() * 10) / problem.getNbrNodes())).getCost(), 0, 0));
 			}
 		}
 
-		System.out.println("test\n"+newPlt);
-		System.out.println(newEd);
+		/*
+		 * Edges from platforms to platforms
+		 */
+		int nn;
+		for(GNode n : newPlt) {
+			for (GNode o : newPlt) {
+				String ns = ""+n.getIndice()+o.getIndice();
+				if(n.getIndice()!=o.getIndice() && (o.getIndice()%10 >= depots.size()) && o.getIndice()/10 == n.getIndice()/10) {
+					nn = Integer.parseInt(ns);
+					newEd.add(new GEdge(nn, n, o, 100000, 0, 0, 0));
+				}
+			}
+		}
+
+		System.out.println("Plateformes secondaires : "+newPlt);
+		System.out.println("\nArcs secondaires : "+newEd);
+		System.out.println("\n\nMaintenant, faut l'intégrer dans un nouveau problème... Et continuer.");
 	}
 }

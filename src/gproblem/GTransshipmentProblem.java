@@ -681,7 +681,7 @@ public class GTransshipmentProblem {
 	public String toString() {
 		return "GTransshipmentProblem [instanceName=" + instanceName
 				+ ", tabNodes=" + Arrays.toString(tabNodes) + ", tabEdges="
-				+ Arrays.toString(tabEdges) + ", T="+t + "]";
+				+ Arrays.toString(tabEdges) + ", T="+t + "]\n";
 	}
 
 
