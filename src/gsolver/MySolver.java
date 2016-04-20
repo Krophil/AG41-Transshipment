@@ -123,9 +123,6 @@ public class MySolver extends GSolver {
 				for (int i = 0; i < this.depots.size(); i++) {
 					newPlt.add(new GNode(problem.getNbrNodes()*10+n.getIndice()*problem.getNbrNodes()+i, 0, 0, 0, 0, 0));
 				}
-				for (int i = 0; i < this.clients.size(); i++) {
-					newPlt.add(new GNode(problem.getNbrNodes()*10+n.getIndice()*problem.getNbrNodes()+depots.size()+i, 0, 0, 0, 0, 0));
-				}
 			}
 		}
 		System.out.println("test\n"+newPlt);
@@ -148,14 +145,23 @@ public class MySolver extends GSolver {
 		 * corresponding mini-platform and adds them
 		 * to newEd
 		 */
-		int i=0;
 		for(GNode n : newPlt){
-			if(i<depots.size()) {
 				for (GNode d : depots)
 					newEd.add(new GEdge(problem.getNbrEdges() + n.getIndice(), d, n, 100000, problem.getNode((n.getIndice() - problem.getNbrNodes() * 10) / problem.getNbrNodes()).getCost(), 0, 0));
-			}
-			i++;
 		}
+		for(GNode n : problem.getTabNodes()) {
+			/*
+			 * for every platform, it creates two secondary
+			 * platforms (mini-platform) and adds them to
+			 * newPlt
+			 */
+			if (n.getDemand() == 0) {
+				for (int i = 0; i < this.clients.size(); i++) {
+					newPlt.add(new GNode(problem.getNbrNodes() * 10 + n.getIndice() * problem.getNbrNodes() + depots.size() + i, 0, 0, 0, 0, 0));
+				}
+			}
+		}
+		System.out.println("test\n"+newPlt);
 		System.out.println(newEd);
 	}
 }
