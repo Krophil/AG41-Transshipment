@@ -165,13 +165,13 @@ public class GNode {
 	@Override
 	public String toString() {
 		if (b_demand==0) { // platform
-			return "GNode "+indice+" [platform, g=" + g_cost + ", s=" + s_time + "]";
+			return "GNode "+indice+" [platform, g=" + g_cost + ", s=" + s_time + "]\n";
 		}
 		else if (b_demand<0) { // depot
-			return "GNode "+indice+" [depot, b=" + b_demand + "]";
+			return "GNode "+indice+" [depot, b=" + b_demand + "]\n";
 		}
 		// client
-		return "GNode "+indice+" [client, b=" + b_demand + "]";
+		return "GNode "+indice+" [client, b=" + b_demand + "]\n";
 	}
 
 	

@@ -168,7 +168,7 @@ public class GEdge {
 	public String toString() {
 		return "GEdge ("+startingNode.getIndice()+","+endingNode.getIndice()+") [u=" + u_capacity
 				+ ", c=" + c_fixedCost + ", h=" + h_unitCost
-				+ ", t=" + t_time + "]";
+				+ ", t=" + t_time + "]\n";
 	}
 	
 	

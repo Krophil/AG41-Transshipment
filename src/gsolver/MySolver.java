@@ -113,6 +113,11 @@ public class MySolver extends GSolver {
 	private void problemChange(){
 		ArrayList<GNode> newPlt = new ArrayList<>();
 		for(GNode n : problem.getTabNodes()) {
+			/*
+			 * for every platform, it creates two secondary
+			 * platforms (mini-platform) and adds them to
+			 * newPlt
+			 */
 			if(n.getDemand()==0){
 				for (int i = 0; i < this.depots.size(); i++) {
 					newPlt.add(new GNode(problem.getNbrNodes()+n.getIndice()+i, 0, 0, 0, 0, 0));
@@ -122,21 +127,25 @@ public class MySolver extends GSolver {
 				}
 			}
 		}
+		System.out.println("test\n"+newPlt);
 		ArrayList<GEdge> newEd = new ArrayList<>();
 		for(GEdge e: problem.getTabEdges()) {
+			/*
+			 * used to detect every edge ending to a
+			 * platform and create a secondary edge to the
+			 * corresponding mini-platform and adds them
+			 * to newEd
+			 */
 			if (platforms.contains(e.getEndingNode())) {
-				newEd.add(new GEdge(problem.getNbrEdges()+e.getIndice(), e.getStartingNode(), newPlt.get(e.getEndingNode().getIndice()+problem.getNbrNodes()), 100000, e.getEndingNode().getCost(), 0, 0));
-				/*System.out.println(e);
-				System.out.println(newEd);
-				System.out.println();*/
+				newEd.add(new GEdge(problem.getNbrEdges()+e.getIndice(), e.getStartingNode(), newPlt.get(e.getEndingNode().getIndice()+problem.getNbrNodes()), e.getCapacity(), e.getEndingNode().getCost(), 0, 0));
 			}
 		}
-		System.out.println(newPlt);
-		System.out.println("\n"+newEd);
-		/*for(GEdge e: problem.getTabEdges()) {
+
+		for(GEdge e: problem.getTabEdges()) {
 			if (platforms.contains(e.getStartingNode())) {
-				newEd.add(new GEdge(e.getStartingNode(), problem.getNbrEdges()+e.getIndice(), newPlt.get(e.getEndingNode().getIndice()+problem.getNbrNodes()), 100000, e.getEndingNode().getCost(), 0));
+				newEd.add(new GEdge(problem.getNbrEdges() + e.getIndice(),newPlt.get(e.getStartingNode().getIndice() + problem.getNbrNodes()+depots.size()),  e.getEndingNode(), e.getCapacity(), e.getEndingNode().getCost(), 0, 0));
 			}
-		}*/
+		}
+		System.out.println("\n\n"+newEd);
 	}
 }
