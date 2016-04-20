@@ -24,6 +24,7 @@ import java.util.Vector;
 import javax.swing.text.TabableView;
 
 import gproblem.GNode;
+import gproblem.GEdge;
 import gproblem.GTransshipmentProblem;
 import gsolution.GTransshipmentSolution;
 import gsolver.GSolver;
@@ -73,6 +74,8 @@ public class MySolver extends GSolver {
 		System.out.println(clients);
 		System.out.println(platforms);
 		System.out.println(depots);
+		System.out.println("-------------------");
+		problemChange();
 		bestSolution = null ;
 		currentSolution = null ;
 	}
@@ -105,5 +108,35 @@ public class MySolver extends GSolver {
 			}
 		}
 		this.depots = newDepots;
+	}
+
+	private void problemChange(){
+		ArrayList<GNode> newPlt = new ArrayList<>();
+		for(GNode n : problem.getTabNodes()) {
+			if(n.getDemand()==0){
+				for (int i = 0; i < this.depots.size(); i++) {
+					newPlt.add(new GNode(problem.getNbrNodes()+n.getIndice()+i, 0, 0, 0, 0, 0));
+				}
+				for (int i = 0; i < this.clients.size(); i++) {
+					newPlt.add(new GNode(problem.getNbrNodes()+n.getIndice()+depots.size()+i, 0, 0, 0, 0, 0));
+				}
+			}
+		}
+		ArrayList<GEdge> newEd = new ArrayList<>();
+		for(GEdge e: problem.getTabEdges()) {
+			if (platforms.contains(e.getEndingNode())) {
+				newEd.add(new GEdge(problem.getNbrEdges()+e.getIndice(), e.getStartingNode(), newPlt.get(e.getEndingNode().getIndice()+problem.getNbrNodes()), 100000, e.getEndingNode().getCost(), 0, 0));
+				/*System.out.println(e);
+				System.out.println(newEd);
+				System.out.println();*/
+			}
+		}
+		System.out.println(newPlt);
+		System.out.println("\n"+newEd);
+		/*for(GEdge e: problem.getTabEdges()) {
+			if (platforms.contains(e.getStartingNode())) {
+				newEd.add(new GEdge(e.getStartingNode(), problem.getNbrEdges()+e.getIndice(), newPlt.get(e.getEndingNode().getIndice()+problem.getNbrNodes()), 100000, e.getEndingNode().getCost(), 0));
+			}
+		}*/
 	}
 }
