@@ -121,7 +121,21 @@ public class GTransshipmentProblem {
 		System.out.println("problem="+toString()) ; 
 	}
 
-	
+	/**
+	 *
+	 * @param instanceName
+	 * @param tabNodessrc
+	 * @param tabEdgessrc
+     */
+	public GTransshipmentProblem(String instanceName, GNode tabNodessrc[], GEdge tabEdgessrc[]) {
+		this.tabNodes = new GNode[tabNodessrc.length];
+		this.tabEdges = new GEdge[tabEdgessrc.length];
+		System.arraycopy(tabNodessrc, 0, this.tabNodes, 0, tabNodes.length);
+		System.arraycopy(tabEdgessrc, 0, this.tabEdges, 0, tabNodes.length);
+		this.instanceName = instanceName;
+
+		System.out.println("problem="+toString());
+	}
 	/**
 	 * 
 	 * @param n
