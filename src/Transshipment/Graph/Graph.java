@@ -4,27 +4,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class Graph {
-	private LinkedList<Integer> nodes;
+public class Graph<Node, Edge> {
+	private HashMap<Integer, Node> nodes;
 	private HashMap<Integer, HashMap<Integer, Edge>> edges;
-	private static int nodeIndex = 0;
 	
 	public Graph() {
-		nodes = new LinkedList<>();
-		edges = new HashMap<>(0);
+		nodes = new HashMap<>();
+		edges = new HashMap<>();
 	}
 	
-	public boolean containsNode(int i) {
-		return nodes.contains(i);
+	public Node getNode(int i) {
+		return nodes.get(i);
 	}
 	
 	public ArrayList<Edge> getOutEdges(int i) {
 		return new ArrayList<Edge>(edges.get(i).values());
 	}
 	
-	public ArrayList<Edge> getInEdges(int i) {
-		ArrayList<Edge> ed = new ArrayList<>(0);
-		for (int n : nodes) {
+	public LinkedList<Edge> getInEdges(int i) {
+		LinkedList<Edge> ed = new LinkedList<>();
+		for (int n : nodes.keySet()) {
 			Edge e = edges.get(n).get(i);
 			if (e != null)
 				ed.add(e);
@@ -32,27 +31,25 @@ public class Graph {
 		return ed;
 	}
 	
-	public int getEdgeCost(int i,  int j) {
+	public Edge getEdge(int i,  int j) {
 		if (edges.get(i) != null) {
-			return edges.get(i).get(j).getCost();
+			return edges.get(i).get(j);
 		}
-		return -1;		
+		return null;	
 	}
 	
-	public void setEdgeCost(int i, int j, int cost) {
-		if (edges.get(i) != null) {
-			edges.get(i).get(j).setCost(cost);
+	public boolean addNode(int i, Node n) {
+		if (!nodes.containsKey(i)) {
+			nodes.put(i, n);
+			edges.put(i, new HashMap<Integer, Edge>());
+			return true;
 		}
+		return false;
 	}
 	
-	public int addNode() {
-		nodes.add(nodeIndex++);
-		return nodeIndex - 1;
-	}
-	
-	public boolean addEdge(int i, int j, int cost) {
-		if (nodes.contains(i) && nodes.contains(j) && !edges.get(i).containsKey(j)) {
-			edges.get(i).put(j, new Edge(i, j, cost));
+	public boolean addEdge(int i, int j, Edge e) {
+		if (nodes.containsKey(i) && nodes.containsKey(j) && !edges.get(i).containsKey(j)) {
+			edges.get(i).put(j, e);
 			return true;
 		}
 		return false;
@@ -65,44 +62,14 @@ public class Graph {
 	}
 	
 	public boolean removeNode(int i) {
-		if (nodes.contains(i)) {
-			nodes.remove((Integer)i);
-			for (Edge e : getInEdges(i)) {
-				edges.get(e.getStart()).remove(e.getEnd());
+		if (nodes.containsKey(i)) {
+			nodes.remove(i);
+			for (int n : nodes.keySet()) {
+				edges.get(n).remove(i);
 			}
-			for (Edge e : getOutEdges(i)) {
-				edges.get(e.getStart()).remove(e.getEnd());
-			}
+			edges.remove(i);
 			return true;
 		}
 		return false;
-	}
-	
-	private class Edge {
-		private final int start;
-		private final int end;
-		private int cost;
-		
-		public Edge(int start, int end, int cost) {
-			this.start = start;
-			this.end = end;
-			this.cost = cost;
-		}
-		
-		public int getStart() {
-			return start;
-		}
-		
-		public int getEnd() {
-			return end;
-		}
-
-		public int getCost() {
-			return cost;
-		}
-
-		public void setCost(int cost) {
-			this.cost = cost;
-		}
 	}
 }
