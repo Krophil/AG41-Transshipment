@@ -1,6 +1,5 @@
 package Transshipment.Graph;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -17,8 +16,8 @@ public class Graph<N, E> {
 		return nodes.get(i);
 	}
 	
-	public ArrayList<E> getOutEdges(int i) {
-		return new ArrayList<E>(edges.get(i).values());
+	public LinkedList<E> getOutEdges(int i) {
+		return new LinkedList<E>(edges.get(i).values());
 	}
 	
 	public LinkedList<E> getInEdges(int i) {
