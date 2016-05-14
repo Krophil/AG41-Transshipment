@@ -1,23 +1,29 @@
 package Transshipment.Graph;
 
 public class Node {
-	private final int demand, unitCost, tranbordingTime;
+	private final int demand;
+	private final double unitCost, transboardingTime;
 
-	public Node(int demand, int unitCost, int tranbordingTime) {
+	public Node(int demand, double unitCost, double transboardingTime) {
 		this.demand = demand;
 		this.unitCost = unitCost;
-		this.tranbordingTime = tranbordingTime;
+		this.transboardingTime = transboardingTime;
 	}
 
 	public int getDemand() {
 		return demand;
 	}
 
-	public int getUnitCost() {
+	public double getUnitCost() {
 		return unitCost;
 	}
 
-	public int getTranbordingTime() {
-		return tranbordingTime;
+	public double getTransboardingTime() {
+		return transboardingTime;
+	}
+	
+	public String toString() {
+		return "demand=" + demand + ";unit cost=" + unitCost 
+				+ ";time=" + transboardingTime + "\n";
 	}
 }

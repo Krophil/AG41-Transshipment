@@ -1,11 +1,11 @@
 package Transshipment.Graph;
 
 public class Edge {
-	private final int capacity, fixedCost, unitCost, travellingTime;
+	private final int capacity;
+	private final double fixedCost, unitCost, travellingTime;
 	private int nbrProduct;
 	
-	public Edge(int capacity, int fixedCost, int unitCost, int travellingTime) {
-		super();
+	public Edge(int capacity, double fixedCost, double unitCost, double travellingTime) {
 		this.capacity = capacity;
 		this.fixedCost = fixedCost;
 		this.unitCost = unitCost;
@@ -17,15 +17,15 @@ public class Edge {
 		return capacity;
 	}
 
-	public int getFixedCost() {
+	public double getFixedCost() {
 		return fixedCost;
 	}
 
-	public int getUnitCost() {
+	public double getUnitCost() {
 		return unitCost;
 	}
 
-	public int getTravellingTime() {
+	public double getTravellingTime() {
 		return travellingTime;
 	}
 
@@ -33,7 +33,7 @@ public class Edge {
 		return nbrProduct;
 	}
 	
-	public int getCost() {
+	public double getCost() {
 		if (nbrProduct == 0)
 			return 0;
 		else
@@ -41,11 +41,15 @@ public class Edge {
 	}
 	
 	public boolean setNbrProduct(int nbrProd) {
-		if (nbrProd < capacity) {
+		if (nbrProd < capacity && nbrProd >= 0) {
 			nbrProduct = nbrProd;
 			return true;
 		}
 		return false;
 	}
 	
+	public String toString() {
+		return "products=" + nbrProduct + "/" + capacity + ";cost=" + getCost() 
+				+ ";time=" + travellingTime + "\n";
+	}
 }

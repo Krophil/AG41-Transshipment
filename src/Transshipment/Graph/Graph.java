@@ -12,52 +12,54 @@ public class Graph<N, E> {
 		edges = new HashMap<>();
 	}
 	
+	public int getNbrNodes() {
+		return nodes.size();
+	}
+	
+	public int getNbrEdges() {
+		int nbr = 0;
+		for (int i : nodes.keySet()) {
+			nbr += edges.get(i).size();
+		}
+		return nbr;
+	}
+	
 	public N getNode(int i) {
 		return nodes.get(i);
 	}
 	
-	public LinkedList<E> getOutEdges(int i) {
-		return new LinkedList<E>(edges.get(i).values());
-	}
-	
-	public LinkedList<E> getInEdges(int i) {
-		LinkedList<E> ed = new LinkedList<>();
-		for (int n : nodes.keySet()) {
-			E e = edges.get(n).get(i);
-			if (e != null)
-				ed.add(e);
-		}
-		return ed;
-	}
-	
 	public E getEdge(int i,  int j) {
-		if (edges.get(i) != null) {
+		if (nodes.containsKey(i)) {
 			return edges.get(i).get(j);
 		}
 		return null;	
 	}
 	
-	public boolean addNode(int i, N n) {
+	public LinkedList<E> getOutEdges(int i) {
+		if (nodes.containsKey(i)) {
+			return new LinkedList<E>(edges.get(i).values());
+		}
+		return null;
+	}
+	
+	public LinkedList<E> getInEdges(int i) {
+		if (nodes.containsKey(i)) {
+			LinkedList<E> ed = new LinkedList<>();
+			for (int n : nodes.keySet()) {
+				E e = edges.get(n).get(i);
+				if (e != null)
+					ed.add(e);
+			}
+			return ed;
+		}
+		return null;
+	}
+	
+	public void setNode(int i, N n) {
 		if (!nodes.containsKey(i)) {
-			nodes.put(i, n);
 			edges.put(i, new HashMap<Integer, E>());
-			return true;
 		}
-		return false;
-	}
-	
-	public boolean addEdge(int i, int j, E e) {
-		if (nodes.containsKey(i) && nodes.containsKey(j) && !edges.get(i).containsKey(j)) {
-			edges.get(i).put(j, e);
-			return true;
-		}
-		return false;
-	}
-	
-	public void removeEdge(int i, int j) {
-		if (edges.get(i) != null) {
-			edges.get(i).remove(j);
-		}
+		nodes.put(i, n);
 	}
 	
 	public boolean removeNode(int i) {
@@ -70,5 +72,34 @@ public class Graph<N, E> {
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean setEdge(int i, int j, E e) {
+		if (nodes.containsKey(i) && nodes.containsKey(j)) {
+			edges.get(i).put(j, e);
+			return true;
+		}
+		return false;
+	}
+	
+	public void removeEdge(int i, int j) {
+		if (nodes.containsKey(i)) {
+			edges.get(i).remove(j);
+		}
+	}
+
+	
+	public String toString() {
+		String s = "NODES :\n";
+		for (N n : nodes.values()) {
+			s += n;
+		}
+		s+= "EDGES :\n";
+		for (int i : nodes.keySet()) {
+			for (int j : edges.get(i).keySet()) {
+				s += i + "->" + j + " : " + edges.get(i).get(j);
+			}
+		}		
+		return s;
 	}
 }
