@@ -7,6 +7,7 @@ import graph.Node;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.LinkedList;
 
 
 public class Solver {
@@ -24,30 +25,33 @@ public class Solver {
 
 	public void solve(String problemFile, long computationTime) {
 		this.computationTime = computationTime;
+		
+		//starting time counter
 		long start = System.currentTimeMillis();
 
+		//reading input file and building the corresponding graph
 		System.out.println("READING FILE------------------------------------------------");
 		loadProblemFile(problemFile);
 		System.out.print(graph);
 		readingTime = System.currentTimeMillis() - start;
 		System.out.println("(reading time = " + readingTime + ")-----------------------------------------");
 		
+		//build an initial solution. this step is always completed even it exceeds the time limit.
 		System.out.println("FINDING AN INITIAL SOLUTION--------------------------------");
-		//init solution ....
-		//TODO
-		
+		LinkedList<Node> leftPlatforms = new LinkedList<>();
+		LinkedList<Node> rightPlatforms = new LinkedList<>();
+		LinkedList<Node> clients = new LinkedList<>();
+		LinkedList<Node> suppliers = new LinkedList<>();
+		//TODO init solution ....
 		initTime = System.currentTimeMillis() - start - readingTime;
-		
 		System.out.println("(init time = " + initTime + ")-------------------------------------------");
+		
+		//find a better solution as long as there is time left
 		System.out.println("IMPROVING SOLUTION------------------------------------------");
 		while (System.currentTimeMillis() - start < computationTime) {
-			//improving the solution ...
-			//TODO
-			// if finished -> break
+			//TODO improving the solution ...
 		}
-		
 		improvementTime = System.currentTimeMillis() - start - initTime - readingTime;
-
 		System.out.println("(improvement time = " + improvementTime + ")------------------------------------");
 	}
 	
@@ -90,14 +94,19 @@ public class Solver {
 										Double.valueOf(parse[6]), Double.valueOf(parse[7])));
 			}
 		} catch (IndexOutOfBoundsException e) {
+			System.out.println("Problem file structure is not respected.");
 			e.printStackTrace();
-		} catch (NullPointerException e) {
+		} catch (NullPointerException e) { 
+			System.out.println("Problem file structure is not respected.");
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (br != null)br.close();
+				if (br != null) 
+					br.close();
+				else
+					System.out.println("Problem file does not exist.");
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
