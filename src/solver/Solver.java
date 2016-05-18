@@ -12,8 +12,8 @@ import java.io.IOException;
 public class Solver {
 	private Graph<Node, Edge> graph;
 	private int maxTime;
-	private long computationTime, initTime, improvementTime;
-	
+	private long computationTime, initTime, improvementTime, readingTime;
+
 	public Solver() {
 		maxTime = -1;
 		graph = null;
@@ -26,20 +26,29 @@ public class Solver {
 		this.computationTime = computationTime;
 		long start = System.currentTimeMillis();
 
+		System.out.println("READING FILE------------------------------------------------");
 		loadProblemFile(problemFile);
+		System.out.print(graph);
+		readingTime = System.currentTimeMillis() - start;
+		System.out.println("(reading time = " + readingTime + ")-----------------------------------------");
+		
+		System.out.println("FINDING AN INITIAL SOLUTION--------------------------------");
 		//init solution ....
 		//TODO
 		
-		initTime = System.currentTimeMillis() - start;
-		start += initTime;
+		initTime = System.currentTimeMillis() - start - readingTime;
 		
+		System.out.println("(init time = " + initTime + ")-------------------------------------------");
+		System.out.println("IMPROVING SOLUTION------------------------------------------");
 		while (System.currentTimeMillis() - start < computationTime) {
 			//improving the solution ...
 			//TODO
 			// if finished -> break
 		}
 		
-		improvementTime = System.currentTimeMillis() - start;
+		improvementTime = System.currentTimeMillis() - start - initTime - readingTime;
+
+		System.out.println("(improvement time = " + improvementTime + ")------------------------------------");
 	}
 	
 	public void saveSolution(String saveFile) {
@@ -47,7 +56,6 @@ public class Solver {
 	}
 	
 	private void loadProblemFile(String file) {
-		System.out.println("Reading file");
 		BufferedReader br = null;
 		graph = new Graph<Node, Edge>();
 		try {
@@ -94,8 +102,6 @@ public class Solver {
 				ex.printStackTrace();
 			}
 		}
-		
-		System.out.println(graph);
 	}
 
 	public long getComputationTime() {
@@ -108,5 +114,10 @@ public class Solver {
 
 	public long getImprovementTime() {
 		return improvementTime;
+	}
+	
+	
+	public long getReadingTime() {
+		return readingTime;
 	}
 }
