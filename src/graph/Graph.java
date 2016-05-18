@@ -1,6 +1,7 @@
 package graph;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.lang.Math;
@@ -8,12 +9,10 @@ import java.lang.Math;
 public class Graph<N, E extends EdgeType> {
 	private HashMap<Integer, N> nodes;
 	private HashMap<Integer, HashMap<Integer, E>> edges;
-	private int counter;
 	
 	public Graph() {
 		nodes = new HashMap<>();
 		edges = new HashMap<>();
-		counter = 0;
 	}
 	
 	public int getNbrNodes() {
@@ -22,6 +21,12 @@ public class Graph<N, E extends EdgeType> {
 	
 	public LinkedList<Integer> getNodeKeys() {
 		return new LinkedList<Integer>(nodes.keySet());
+	}
+	
+	public int nextValidKey() {
+		LinkedList<Integer> ls = new LinkedList<>(nodes.keySet());
+		Collections.sort(ls);
+		return ls.getLast();
 	}
 	
 	public int getNbrEdges() {
@@ -63,18 +68,11 @@ public class Graph<N, E extends EdgeType> {
 		return null;
 	}
 	
-	public int addNode(N n) {
-		edges.put(counter++, new HashMap<Integer, E>());
-		nodes.put(counter-1, n);
-		return counter-1;
-	}
-	
-	public boolean setNode(int i, N n) {
-		if (nodes.containsKey(i)) {
-			nodes.put(i, n);
-			return true;
-		} else
-			return false;
+	public void setNode(int i, N n) {
+		if (!nodes.containsKey(i)) {
+			edges.put(i, new HashMap<Integer, E>());
+		}
+		nodes.put(i, n);
 	}
 	
 	public boolean removeNode(int i) {
