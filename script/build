@@ -5,7 +5,7 @@
 export ROOT_DIR=.
 export CLASS_DIR=$ROOT_DIR/out
 export CLASSPATH=$CLASS_DIR
-export SRC="./src/*.java ./src/gproblem/*.java ./src/gsolution/*.java ./src/gsolver/*.java ./src/gio/*.java"
+export SRC="./src/*.java ./src/graph/*.java ./src/solver/*.java"
 
 echo javac -Xlint -nowarn -d $CLASS_DIR $SRC
 javac -Xlint -nowarn -d $CLASS_DIR $SRC
