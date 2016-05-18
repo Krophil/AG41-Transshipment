@@ -1,12 +1,13 @@
-package Solver;
+package solver;
+
+import graph.Edge;
+import graph.Graph;
+import graph.Node;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-import Transshipment.Graph.Edge;
-import Transshipment.Graph.Graph;
-import Transshipment.Graph.Node;
 
 public class Solver {
 	private Graph<Node, Edge> graph;
@@ -21,7 +22,7 @@ public class Solver {
 		improvementTime = -1;
 	}
 
-	private void solve(String problemFile, long computationTime) {
+	public void solve(String problemFile, long computationTime) {
 		this.computationTime = computationTime;
 		long start = System.currentTimeMillis();
 
@@ -35,6 +36,7 @@ public class Solver {
 		while (System.currentTimeMillis() - start < computationTime) {
 			//improving the solution ...
 			//TODO
+			// if finished -> break
 		}
 		
 		improvementTime = System.currentTimeMillis() - start;
@@ -45,6 +47,7 @@ public class Solver {
 	}
 	
 	private void loadProblemFile(String file) {
+		System.out.println("Reading file");
 		BufferedReader br = null;
 		graph = new Graph<Node, Edge>();
 		try {
@@ -52,14 +55,13 @@ public class Solver {
 			int nbrNodes, nbrEdges;
 			
 			br = new BufferedReader(new FileReader(file));
-
 			br.readLine(); // name
 			currLine = br.readLine(); //nbrNodes
-			nbrNodes = Integer.getInteger(currLine.split(" ")[2]);
+			nbrNodes = Integer.valueOf(currLine.split(" ")[2]);
 			currLine = br.readLine(); //nbrNodes
-			nbrEdges = Integer.getInteger(currLine.split(" ")[2]);
+			nbrEdges = Integer.valueOf(currLine.split(" ")[2]);
 			currLine = br.readLine(); //maxTime
-			maxTime = Integer.getInteger(currLine.split(" ")[2]);
+			maxTime = (Double.valueOf(currLine.split(" ")[2])).intValue();
 			for (int i = 0; i < 5; i++) { //comments
 				br.readLine();
 			}
@@ -92,6 +94,8 @@ public class Solver {
 				ex.printStackTrace();
 			}
 		}
+		
+		System.out.println(graph);
 	}
 
 	public long getComputationTime() {

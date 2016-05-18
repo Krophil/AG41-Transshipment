@@ -1,4 +1,4 @@
-package Transshipment.Graph;
+package graph;
 
 public class Node {
 	private final int demand;

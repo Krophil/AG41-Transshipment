@@ -1,4 +1,4 @@
-package Transshipment.Graph;
+package graph;
 
 public class Edge {
 	private final int capacity;
@@ -50,6 +50,6 @@ public class Edge {
 	
 	public String toString() {
 		return "products=" + nbrProduct + "/" + capacity + ";cost=" + getCost() 
-				+ ";time=" + travellingTime + "\n";
+				+ "(" + fixedCost + " + x" + unitCost + ")" + ";time=" + travellingTime + "\n";
 	}
 }
