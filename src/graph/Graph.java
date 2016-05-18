@@ -88,6 +88,15 @@ public class Graph<N, E> {
 		}
 	}
 
+	public boolean containsNode(int i) {
+		return nodes.containsKey(i);
+	}
+	
+	public boolean containsEdge(int i, int j) {
+		return edges.containsKey(i) && edges.get(i).containsKey(j);
+	}
+	
+	//TODO inverse graph
 	
 	public String toString() {
 		String s = "NODES :\n";
