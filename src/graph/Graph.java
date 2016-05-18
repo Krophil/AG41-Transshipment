@@ -3,7 +3,7 @@ package graph;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class Graph<N, E> {
+public class Graph<N, E extends EdgeType> {
 	private HashMap<Integer, N> nodes;
 	private HashMap<Integer, HashMap<Integer, E>> edges;
 	
@@ -14,6 +14,10 @@ public class Graph<N, E> {
 	
 	public int getNbrNodes() {
 		return nodes.size();
+	}
+	
+	public LinkedList<Integer> getNodeKeys() {
+		return new LinkedList<Integer>(nodes.keySet());
 	}
 	
 	public int getNbrEdges() {
@@ -96,7 +100,30 @@ public class Graph<N, E> {
 		return edges.containsKey(i) && edges.get(i).containsKey(j);
 	}
 	
-	//TODO inverse graph
+	public Graph<N, E> getResidualGraph() {
+		Graph<N, E> g = new Graph<>();
+		int ind = 0;
+		
+		for (N n : nodes.values()) {
+			g.setNode(ind++, n);
+		}
+		
+		for (int i : nodes.keySet()) {
+			for (int j : nodes.keySet()) {
+				E e = getEdge(i, j);
+				if (e != null) {
+					E opp = (E) e.getOpposite();
+					E rem = (E) e.getRemaining();
+					if (opp != null)
+						g.setEdge(j, i, opp);
+					if (rem != null)
+						g.setEdge(i, j, rem);
+				}
+			}
+		}
+		
+		return g;
+	}
 	
 	public String toString() {
 		String s = "NODES :\n";
