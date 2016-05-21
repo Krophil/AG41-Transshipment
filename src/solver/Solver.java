@@ -113,6 +113,39 @@ public class Solver {
 		}
 	}
 
+	private void separatePlatforms() {
+		Graph <Node, Edge> g = new Graph<>();
+		LinkedList<Integer> leftPlatforms = new LinkedList<>();
+		LinkedList<Integer> rightPlatforms = new LinkedList<>();
+		LinkedList<Integer> clients = new LinkedList<>();
+		LinkedList<Integer> suppliers = new LinkedList<>();
+
+		for (int n : graph.getNodeKeys()) {
+			if (graph.getNode(n).getDemand() < 0) {
+				suppliers.add(n);
+				g.setNode(g.nextValidKey(), graph.getNode(n));
+			} else if (graph.getNode(n).getDemand() == 0) {
+				for (int s : suppliers) {
+					int v = g.nextValidKey();
+					g.setNode(v, new Node(0, 0, 0));
+					leftPlatforms.add(v);
+                    /*for(int i : suppliers) {
+                        g.setEdge(n, n, new Edge(Integer.MAX_VALUE, 0, graph.getNode(n).getUnitCost(), graph.getNode(n).getTransboardingTime()))
+                    }*/
+				}
+			} else if (graph.getNode(n).getDemand() == 0) {
+				clients.add(n);
+				g.setNode(g.nextValidKey(), graph.getNode(n));
+				for (int l : leftPlatforms) {
+                    int k = g.nextValidKey();
+                    g.setNode(k, new Node(0,0,0));
+                    rightPlatforms.add(k);
+                }
+			}
+		}
+	}
+
+
 	public long getComputationTime() {
 		return computationTime;
 	}
