@@ -38,10 +38,8 @@ public class Solver {
 		
 		//build an initial solution. this step is always completed even it exceeds the time limit.
 		System.out.println("FINDING AN INITIAL SOLUTION--------------------------------");
-		LinkedList<Node> leftPlatforms = new LinkedList<>();
-		LinkedList<Node> rightPlatforms = new LinkedList<>();
-		LinkedList<Node> clients = new LinkedList<>();
-		LinkedList<Node> suppliers = new LinkedList<>();
+        separatePlatforms();
+
 		//TODO init solution ....
 		initTime = System.currentTimeMillis() - start - readingTime;
 		System.out.println("(init time = " + initTime + ")-------------------------------------------");
@@ -119,30 +117,58 @@ public class Solver {
 		LinkedList<Integer> rightPlatforms = new LinkedList<>();
 		LinkedList<Integer> clients = new LinkedList<>();
 		LinkedList<Integer> suppliers = new LinkedList<>();
+        LinkedList<Integer> oldPlatforms = new LinkedList<>();
 
 		for (int n : graph.getNodeKeys()) {
-			if (graph.getNode(n).getDemand() < 0) {
-				suppliers.add(n);
-				g.setNode(g.nextValidKey(), graph.getNode(n));
-			} else if (graph.getNode(n).getDemand() == 0) {
+			if (graph.getNode(n).getDemand() < 0) { // It's a supplier
+                int v = g.nextValidKey();
+				suppliers.add(v);
+				g.setNode(v, graph.getNode(n)); //add a new supplier to g
+			} else if (graph.getNode(n).getDemand() == 0) { // It's a platform
 				for (int s : suppliers) {
 					int v = g.nextValidKey();
-					g.setNode(v, new Node(0, 0, 0));
 					leftPlatforms.add(v);
-                    /*for(int i : suppliers) {
-                        g.setEdge(n, n, new Edge(Integer.MAX_VALUE, 0, graph.getNode(n).getUnitCost(), graph.getNode(n).getTransboardingTime()))
-                    }*/
+                    g.setNode(v, new Node(0, 0, 0)); // add a left platform
+                    System.out.println(s+"->"+v);
+                    g.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
+                    oldPlatforms.add(n); // register every platform to collect data transshipment
 				}
-			} else if (graph.getNode(n).getDemand() == 0) {
-				clients.add(n);
-				g.setNode(g.nextValidKey(), graph.getNode(n));
-				for (int l : leftPlatforms) {
+
+			} else if (graph.getNode(n).getDemand() > 0) { // It's a client
+                int v = g.nextValidKey();
+				clients.add(v);
+				g.setNode(g.nextValidKey(), graph.getNode(n)); // add the client
+				for (int o : oldPlatforms) { // for each old platform, a new right platform and a new edge linked to client are added
                     int k = g.nextValidKey();
                     g.setNode(k, new Node(0,0,0));
+                    g.setEdge(k, n, new Edge(Integer.MAX_VALUE, graph.getEdge(o,n).getFixedCost(), graph.getEdge(o, n).getUnitCost(), graph.getEdge(o, n).getTravellingTime()));
                     rightPlatforms.add(k);
+                    for(int r : rightPlatforms) {
+                        g.setEdge(r, k, new Edge(Integer.MAX_VALUE, 0, graph.getNode(n).getUnitCost(), graph.getNode(n).getTransboardingTime()));
+                        // add edges between right and left platforms
+                    }
                 }
 			}
 		}
+
+        System.out.println("Suppliers "+suppliers.size());
+        for(int i : suppliers) {
+            System.out.println(g.getNode(i));
+        }
+            System.out.println("Left Platforms "+leftPlatforms.size());
+        for(int i : leftPlatforms){
+            System.out.println(g.getNode(i));
+            System.out.println("Edges " + g.getOutEdges(i));
+        }
+        System.out.println("Right Platforms "+rightPlatforms.size());
+        for(int i : rightPlatforms){
+            System.out.println(g.getNode(i));
+        }
+        System.out.println("Clients "+clients.size());
+        for(int i : clients) {
+            System.out.println(g.getNode(i));
+        }
+
 	}
 
 

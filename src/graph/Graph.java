@@ -26,7 +26,10 @@ public class Graph<N, E extends EdgeType> {
 	public int nextValidKey() {
 		LinkedList<Integer> ls = new LinkedList<>(nodes.keySet());
 		Collections.sort(ls);
-		return ls.getLast();
+		if(ls.isEmpty())
+		    return 1;
+        else
+            return ls.getLast()+1;
 	}
 	
 	public int getNbrEdges() {

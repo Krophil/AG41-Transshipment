@@ -12,6 +12,14 @@ public class Edge implements EdgeType {
 		this.travellingTime = travellingTime;
 		nbrProduct = 0;
 	}
+
+	public Edge(Edge e) {
+        this.capacity = e.getCapacity();
+        this.fixedCost = e.getFixedCost();
+        this.unitCost = e.getUnitCost();
+        this.travellingTime = e.getTravellingTime();
+        this.nbrProduct = 0;
+    }
 	
 	public int getCapacity() {
 		return capacity;
