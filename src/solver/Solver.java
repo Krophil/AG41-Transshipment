@@ -131,63 +131,42 @@ public class Solver {
 	}
 
 	private void separatePlatforms() {
-		Graph <Node, Edge> g = new Graph<>();
-        
-		for (int n : graph.getNodeKeys()) {
-			if (graph.getNode(n).getDemand() < 0) { // It's a supplier
-                int v = g.nextValidKey();
-				suppliers.add(v);
-				g.setNode(v, graph.getNode(n)); //add a new supplier to g
-			} else if (graph.getNode(n).getDemand() == 0) { // It's a platform
-				for (int s : suppliers) {
-                    if(graph.getEdge(s,n).getCapacity() != 0) {
-                        int v = g.nextValidKey();
-                        leftPlatforms.add(v);
-                        g.setNode(v, new Node(0, 0, 0)); // add a left platform
-                        System.out.println(s + "->" + v);
-                        g.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
-                    }
-                        oldPlatforms.add(n); // register every platform to collect data transshipment
-				}
-
-			} else if (graph.getNode(n).getDemand() > 0) { // It's a client
-                int v = g.nextValidKey();
-				clients.add(v);
-				g.setNode(g.nextValidKey(), graph.getNode(n)); // add the client
-				for (int o : oldPlatforms) { // for each old platform, a new right platform and a new edge linked to client are added
-                    if(graph.getEdge(o,n).getCapacity() != 0) {
-                        int k = g.nextValidKey();
-                        g.setNode(k, new Node(0, 0, 0));
-                        g.setEdge(k, n, new Edge(graph.getEdge(o, n).getCapacity(), graph.getEdge(o, n).getFixedCost(), graph.getEdge(o, n).getUnitCost(), graph.getEdge(o, n).getTravellingTime()));
-                        rightPlatforms.add(k);
-                        for (int r : rightPlatforms) {
-                            g.setEdge(r, k, new Edge(Integer.MAX_VALUE, 0, graph.getNode(n).getUnitCost(), graph.getNode(n).getTransboardingTime()));
-                            // add edges between right and left platforms
-                        }
-                    }
+        for (int n : oldPlatforms) {
+            LinkedList<Integer> left = new LinkedList<>();
+            LinkedList<Integer> right = new LinkedList<>();
+            for (int s : suppliers) {
+                if (graph.getEdge(s, n).getCapacity() != 0) {
+                    int v = graph.nextValidKey();
+                    leftPlatforms.add(v);
+                    graph.setNode(v, new Node(0, 0, 0)); // add a left platform
+                    System.out.println(s + "->" + v + "\n");
+                    graph.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
+                    left.add(v);
                 }
-			}
-		}
-		System.out.println("New graph\n" + g);
-		/*System.out.println("Suppliers "+suppliers.size());
-        for(int i : suppliers) {
-            System.out.println(i+" "+g.getNode(i));
-            System.out.println("Edges " + g.getOutEdges(i));
+                //oldPlatforms.remove(n);
+            }
+
+            System.out.println(clients);
+            for(int c : clients) {
+                    int v = graph.nextValidKey();
+                    rightPlatforms.add(v);
+                    graph.setNode(v, new Node(0, 0, 0)); // add a right platform
+                    System.out.println();
+                    System.out.println(v + "->" + c);
+                    System.out.println(n);
+                    graph.setEdge(v,c, new Edge(graph.getEdge(n, c)));
+                    right.add(v);
+            }
+            for(int l : left) {
+                for(int r : right) {
+                    graph.setEdge(l, r, new Edge(Integer.MAX_VALUE, 0, graph.getNode(n).getUnitCost(), graph.getNode(n).getTransboardingTime()));
+                }
+            }
+            graph.removeNode(n);
         }
-        System.out.println("Left Platforms "+leftPlatforms.size());
-        for(int i : leftPlatforms){
-            System.out.println(i+" "+g.getNode(i));
-            System.out.println("Edges " + g.getOutEdges(i));
-        }
-        System.out.println("Right Platforms "+rightPlatforms.size());
-        for(int i : rightPlatforms){
-            System.out.println(i+" "+g.getNode(i));
-            System.out.println("Edges " + g.getOutEdges(i));
-        }
-        System.out.println("Clients "+clients.size());
-        for(int i : clients) {
-            System.out.println(i+" "+g.getNode(i));
-        }*/
+
+        System.out.println(leftPlatforms);
+        System.out.println(graph);
 
 	}
 

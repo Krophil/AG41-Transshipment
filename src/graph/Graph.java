@@ -64,7 +64,7 @@ public class Graph<N, E extends EdgeType> {
 			for (int n : nodes.keySet()) {
 				E e = edges.get(n).get(i);
 				if (e != null)
-					ed.add(i);
+					ed.add(n);
 			}
 			return ed;
 		}
