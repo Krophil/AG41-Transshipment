@@ -51,20 +51,20 @@ public class Graph<N, E extends EdgeType> {
 		return null;	
 	}
 	
-	public LinkedList<E> getOutEdges(int i) {
+	public LinkedList<Integer> getOutEdges(int i) {
 		if (nodes.containsKey(i)) {
-			return new LinkedList<E>(edges.get(i).values());
+			return new LinkedList<>(edges.get(i).keySet());
 		}
 		return null;
 	}
 	
-	public LinkedList<E> getInEdges(int i) {
+	public LinkedList<Integer> getInEdges(int i) {
 		if (nodes.containsKey(i)) {
-			LinkedList<E> ed = new LinkedList<>();
+			LinkedList<Integer> ed = new LinkedList<>();
 			for (int n : nodes.keySet()) {
 				E e = edges.get(n).get(i);
 				if (e != null)
-					ed.add(e);
+					ed.add(i);
 			}
 			return ed;
 		}
@@ -139,8 +139,8 @@ public class Graph<N, E extends EdgeType> {
 	
 	public String toString() {
 		String s = "NODES :\n";
-		for (N n : nodes.values()) {
-			s += n;
+		for (int n : nodes.keySet()) {
+			s += n + ":" + nodes.get(n);
 		}
 		s+= "EDGES :\n";
 		for (int i : nodes.keySet()) {

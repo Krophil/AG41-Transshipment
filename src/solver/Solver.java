@@ -14,16 +14,28 @@ public class Solver {
 	private Graph<Node, Edge> graph;
 	private int maxTime;
 	private long computationTime, initTime, improvementTime, readingTime;
-
+	private LinkedList<Integer> oldPlatforms, leftPlatforms, rightPlatforms, suppliers, clients;
+	
 	public Solver() {
 		maxTime = -1;
-		graph = null;
+		graph = new Graph<>();
 		computationTime = -1;
 		initTime = -1;
 		improvementTime = -1;
+		readingTime = -1;
+		leftPlatforms = new LinkedList<>();
+		rightPlatforms = new LinkedList<>();
+		suppliers = new LinkedList<>();
+		clients = new LinkedList<>();
+		oldPlatforms = new LinkedList<>();
 	}
 
 	public void solve(String problemFile, long computationTime) {
+		leftPlatforms = new LinkedList<>();
+		rightPlatforms = new LinkedList<>();
+		suppliers = new LinkedList<>();
+		clients = new LinkedList<>();
+		oldPlatforms = new LinkedList<>();
 		this.computationTime = computationTime;
 		
 		//starting time counter
@@ -59,7 +71,6 @@ public class Solver {
 	
 	private void loadProblemFile(String file) {
 		BufferedReader br = null;
-		graph = new Graph<Node, Edge>();
 		try {
 			String currLine;
 			int nbrNodes, nbrEdges;
@@ -80,6 +91,14 @@ public class Solver {
 				String[] parse = currLine.split(" ");
 				graph.setNode(Integer.valueOf(parse[1]), new Node(Integer.valueOf(parse[4]),
 								Double.valueOf(parse[5]), Double.valueOf(parse[6])));
+				int index = Integer.valueOf(parse[1]);
+				int demand = graph.getNode(Integer.valueOf(parse[1])).getDemand();
+				if (demand > 0)
+					clients.add(index);
+				else if (demand < 0)
+					suppliers.add(index);
+				else
+					oldPlatforms.add(index);
 			}
 			for (int i = 0; i < 7; i++) { //comments
 				br.readLine();
@@ -113,12 +132,7 @@ public class Solver {
 
 	private void separatePlatforms() {
 		Graph <Node, Edge> g = new Graph<>();
-		LinkedList<Integer> leftPlatforms = new LinkedList<>();
-		LinkedList<Integer> rightPlatforms = new LinkedList<>();
-		LinkedList<Integer> clients = new LinkedList<>();
-		LinkedList<Integer> suppliers = new LinkedList<>();
-        LinkedList<Integer> oldPlatforms = new LinkedList<>();
-
+        
 		for (int n : graph.getNodeKeys()) {
 			if (graph.getNode(n).getDemand() < 0) { // It's a supplier
                 int v = g.nextValidKey();
@@ -154,7 +168,7 @@ public class Solver {
                 }
 			}
 		}
-		System.out.println("New graph" + g);
+		System.out.println("New graph\n" + g);
 		/*System.out.println("Suppliers "+suppliers.size());
         for(int i : suppliers) {
             System.out.println(i+" "+g.getNode(i));

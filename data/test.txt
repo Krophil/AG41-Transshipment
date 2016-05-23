@@ -1,0 +1,37 @@
+NAME : TEST
+NBR_NODES : 8
+NBR_EDGES : 12
+T : 146.17413705684166
+# NODE: i x_i y_i b_i g_i s_i
+# x_i, y_i : x, y of node i
+# b_i : demand of node_i, <0 for depot, >0 for client, =0 for platforms
+# g_i : cost for using node i, >0 only for platforms
+# s_i : time for crossing node _i, >0 only for platforms
+NODE: 1 10 10 -3 0.0 0.0
+NODE: 2 10 20 -2 0.0 0.0
+NODE: 3 10 30 -4 0.0 0.0
+NODE: 4 10 40 4 0.0 0.0
+NODE: 5 10 50 1 0.0 0.0
+NODE: 6 10 60 4 0.0 0.0
+NODE: 7 10 70 0 10.0 2.0
+NODE: 8 50 10 0 20.0 1.0
+# EDGE: k i j u_ij c_ij h_ij t_ij
+# i : starting node of edge k
+# j : ending node of edge k
+# u_ij : capacity of edge (i,j)
+# c_ij : fixed cost for the use of (i,j)
+# h_ij : unit cost for (i,j)
+# t_ij : delivery time for (i,j)
+EDGE: 1 1 7 1300 66.87891741163605 18.926250851522113 1.0
+EDGE: 1 1 8 3400 45.3530688751988 4.929587794396663 1.0
+EDGE: 1 2 7 2000 87.34991334564167 13.470268712981468 1.0
+EDGE: 1 2 8 7300 59.773995697349505 16.36133170964041 1.0
+EDGE: 1 3 7 1100 28.32823452379512 6.014072522453666 1.0
+EDGE: 1 3 8 6100 52.016527316403945 8.38108279951339 1.0
+EDGE: 1 7 4 2300 83.8608808450138 3.3756305046048936 1.0
+EDGE: 1 7 5 600 11.168346324050775 1.5584909972716101 1.0
+EDGE: 1 7 6 1100 74.08341249148566 15.425331523117844 1.0
+EDGE: 1 8 4 2300 83.8608808450138 3.3756305046048936 1.0
+EDGE: 1 8 5 600 11.168346324050775 1.5584909972716101 1.0
+EDGE: 1 8 6 1100 74.08341249148566 15.425331523117844 1.0
+EOF
