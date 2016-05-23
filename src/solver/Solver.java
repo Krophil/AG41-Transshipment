@@ -170,6 +170,16 @@ public class Solver {
 
 	}
 
+    public int getCapRes(int a, int b, int c, int d) {
+        Graph resid = graph.getResidualGraph();
+        int max = resid.getEdge(a,b).getCapacity();
+        max = (resid.getEdge(b,c).getCapacity() < max ? resid.getEdge(b,c).getCapacity() : max); //version ternaire
+
+        if(resid.getEdge(c,d).getCapacity() < max)
+            max = resid.getEdge(c,d).getCapacity(); // version normale
+
+        return max;
+    }
 
 	public long getComputationTime() {
 		return computationTime;

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.lang.Math;
 
-public class Graph<N, E extends EdgeType> {
+public class Graph<N, E extends Edge> {
 	private HashMap<Integer, N> nodes;
 	private HashMap<Integer, HashMap<Integer, E>> edges;
 	
