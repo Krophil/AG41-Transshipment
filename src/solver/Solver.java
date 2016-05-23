@@ -150,24 +150,26 @@ public class Solver {
                 }
 			}
 		}
-
-        System.out.println("Suppliers "+suppliers.size());
+		System.out.println("New graph" + g);
+		/*System.out.println("Suppliers "+suppliers.size());
         for(int i : suppliers) {
-            System.out.println(g.getNode(i));
+            System.out.println(i+" "+g.getNode(i));
+            System.out.println("Edges " + g.getOutEdges(i));
         }
-            System.out.println("Left Platforms "+leftPlatforms.size());
+        System.out.println("Left Platforms "+leftPlatforms.size());
         for(int i : leftPlatforms){
-            System.out.println(g.getNode(i));
+            System.out.println(i+" "+g.getNode(i));
             System.out.println("Edges " + g.getOutEdges(i));
         }
         System.out.println("Right Platforms "+rightPlatforms.size());
         for(int i : rightPlatforms){
-            System.out.println(g.getNode(i));
+            System.out.println(i+" "+g.getNode(i));
+            System.out.println("Edges " + g.getOutEdges(i));
         }
         System.out.println("Clients "+clients.size());
         for(int i : clients) {
-            System.out.println(g.getNode(i));
-        }
+            System.out.println(i+" "+g.getNode(i));
+        }*/
 
 	}
 
