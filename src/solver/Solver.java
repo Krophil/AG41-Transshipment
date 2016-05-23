@@ -126,12 +126,14 @@ public class Solver {
 				g.setNode(v, graph.getNode(n)); //add a new supplier to g
 			} else if (graph.getNode(n).getDemand() == 0) { // It's a platform
 				for (int s : suppliers) {
-					int v = g.nextValidKey();
-					leftPlatforms.add(v);
-                    g.setNode(v, new Node(0, 0, 0)); // add a left platform
-                    System.out.println(s+"->"+v);
-                    g.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
-                    oldPlatforms.add(n); // register every platform to collect data transshipment
+                    if(graph.getEdge(s,n).getCapacity() != 0) {
+                        int v = g.nextValidKey();
+                        leftPlatforms.add(v);
+                        g.setNode(v, new Node(0, 0, 0)); // add a left platform
+                        System.out.println(s + "->" + v);
+                        g.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
+                    }
+                        oldPlatforms.add(n); // register every platform to collect data transshipment
 				}
 
 			} else if (graph.getNode(n).getDemand() > 0) { // It's a client
@@ -139,13 +141,15 @@ public class Solver {
 				clients.add(v);
 				g.setNode(g.nextValidKey(), graph.getNode(n)); // add the client
 				for (int o : oldPlatforms) { // for each old platform, a new right platform and a new edge linked to client are added
-                    int k = g.nextValidKey();
-                    g.setNode(k, new Node(0,0,0));
-                    g.setEdge(k, n, new Edge(Integer.MAX_VALUE, graph.getEdge(o,n).getFixedCost(), graph.getEdge(o, n).getUnitCost(), graph.getEdge(o, n).getTravellingTime()));
-                    rightPlatforms.add(k);
-                    for(int r : rightPlatforms) {
-                        g.setEdge(r, k, new Edge(Integer.MAX_VALUE, 0, graph.getNode(n).getUnitCost(), graph.getNode(n).getTransboardingTime()));
-                        // add edges between right and left platforms
+                    if(graph.getEdge(o,n).getCapacity() != 0) {
+                        int k = g.nextValidKey();
+                        g.setNode(k, new Node(0, 0, 0));
+                        g.setEdge(k, n, new Edge(graph.getEdge(o, n).getCapacity(), graph.getEdge(o, n).getFixedCost(), graph.getEdge(o, n).getUnitCost(), graph.getEdge(o, n).getTravellingTime()));
+                        rightPlatforms.add(k);
+                        for (int r : rightPlatforms) {
+                            g.setEdge(r, k, new Edge(Integer.MAX_VALUE, 0, graph.getNode(n).getUnitCost(), graph.getNode(n).getTransboardingTime()));
+                            // add edges between right and left platforms
+                        }
                     }
                 }
 			}
