@@ -160,25 +160,54 @@ public class Solver {
             for(int l : left) {
                 for(int r : right) {
                     graph.setEdge(l, r, new Edge(Integer.MAX_VALUE, 0, graph.getNode(n).getUnitCost(), graph.getNode(n).getTransboardingTime()));
+                    int sup = graph.getInEdges(l).getFirst(); //get the supplier
+                    int cl = graph.getOutEdges(r).getFirst(); //get the client
+                    if(getTime(graph, sup, l, r, cl) > maxTime) { //test travelling + transboarding time between the two nodes
+                        graph.removeNode(l);
+                        graph.removeNode(r);
+                    }
+
                 }
             }
             graph.removeNode(n);
         }
 
-        System.out.println(leftPlatforms);
+        //System.out.println(leftPlatforms);
         System.out.println(graph);
 
 	}
 
-    public int getCapRes(int a, int b, int c, int d) {
-        Graph resid = graph.getResidualGraph();
-        int max = resid.getEdge(a,b).getCapacity();
-        max = (resid.getEdge(b,c).getCapacity() < max ? resid.getEdge(b,c).getCapacity() : max); //version ternaire
 
-        if(resid.getEdge(c,d).getCapacity() < max)
-            max = resid.getEdge(c,d).getCapacity(); // version normale
+
+    public int getCap(Graph g, int a, int b, int c, int d) {
+        int max = g.getEdge(a,b).getCapacity();
+        max = (g.getEdge(b,c).getCapacity() < max ? g.getEdge(b,c).getCapacity() : max); //version ternaire
+
+        if(g.getEdge(c,d).getCapacity() < max)
+            max = g.getEdge(c,d).getCapacity(); // version normale
 
         return max;
+    }
+
+    public double getTime(Graph g, int a, int b, int c, int d) {
+        System.out.println("a,b : " + a + b);
+        return g.getEdge(a,b).getTravellingTime() + g.getEdge(b,c).getTravellingTime() + g.getEdge(c,d).getTravellingTime();
+    }
+
+
+    public void fordfulk () {
+        int s = 0;
+        int t = graph.nextValidKey();
+        graph.setNode(s, new Node(0,0,0));
+        graph.setNode(t, new Node(0,0,0));
+        for(int n : suppliers)
+            graph.setEdge(s, n, new Edge(-(graph.getNode(n).getDemand()), 0, 0, 0));
+
+        for(int n : clients)
+            graph.setEdge(n, t, new Edge(graph.getNode(n).getDemand(), 0, 0, 0));
+        Graph resid = graph.getResidualGraph();
+
+
     }
 
 	public long getComputationTime() {
