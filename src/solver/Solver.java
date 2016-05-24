@@ -135,18 +135,14 @@ public class Solver {
             LinkedList<Integer> left = new LinkedList<>();
             LinkedList<Integer> right = new LinkedList<>();
             for (int s : suppliers) {
-                if (graph.getEdge(s, n).getCapacity() != 0) {
-
-					if(graph.getEdge(s,n).getCapacity() != 0) {
-						int v = graph.nextValidKey();
-						leftPlatforms.add(v);
-						graph.setNode(v, new Node(0, 0, 0)); // add a left platform
-						System.out.println(s + "->" + v + "\n");
-						graph.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
-						left.add(v);
-					}
-                }
-                //oldPlatforms.remove(n);
+				if(graph.getEdge(s,n).getCapacity() != 0) {
+					int v = graph.nextValidKey();
+					leftPlatforms.add(v);
+					graph.setNode(v, new Node(0, 0, 0)); // add a left platform
+					System.out.println(s + "->" + v + "\n");
+					graph.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
+					left.add(v);
+				}
             }
 
             System.out.println(clients);
