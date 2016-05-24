@@ -140,7 +140,8 @@ public class Solver {
                     leftPlatforms.add(v);
                     graph.setNode(v, new Node(0, 0, 0)); // add a left platform
                     System.out.println(s + "->" + v + "\n");
-                    graph.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
+					if(graph.getEdge(s,n).getCapacity() != 0)
+                        graph.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
                     left.add(v);
                 }
                 //oldPlatforms.remove(n);
@@ -154,7 +155,8 @@ public class Solver {
                     System.out.println();
                     System.out.println(v + "->" + c);
                     System.out.println(n);
-                    graph.setEdge(v,c, new Edge(graph.getEdge(n, c)));
+                    if(graph.getEdge(n,c).getCapacity() != 0)
+                        graph.setEdge(v,c, new Edge(graph.getEdge(n, c)));
                     right.add(v);
             }
             for(int l : left) {
@@ -179,23 +181,31 @@ public class Solver {
 
 
 
-    public int getCap(Graph g, int a, int b, int c, int d) {
-        int max = g.getEdge(a,b).getCapacity();
-        max = (g.getEdge(b,c).getCapacity() < max ? g.getEdge(b,c).getCapacity() : max); //version ternaire
+    public int getCap(Graph g, int a, int b, int c, int d) { //get capacity and return the minimum maximum capacity of the path
+        int max = 0;
+        if(g.getInEdges(b) != null)
+            g.getEdge(a,b).getCapacity();
+        max = (g.getInEdges(c) != null && g.getEdge(b,c).getCapacity() < max ? g.getEdge(b,c).getCapacity() : max); //version ternaire
 
-        if(g.getEdge(c,d).getCapacity() < max)
+        if(g.getInEdges(d) != null && g.getEdge(c,d).getCapacity() < max)
             max = g.getEdge(c,d).getCapacity(); // version normale
 
         return max;
     }
 
-    public double getTime(Graph g, int a, int b, int c, int d) {
-        System.out.println("a,b : " + a + b);
+    public double getTime(Graph g, int a, int b, int c, int d) { //return time of a path including edge existence.
+        double time = 0;
+        if(g.getInEdges(b) != null)
+            time += g.getEdge(a,b).getTravellingTime();
+        if(g.getInEdges(c) != null)
+            time += g.getEdge(b,c).getTravellingTime();
+        if(g.getInEdges(d) != null)
+            time += g.getEdge(c,d).getTravellingTime();
         return g.getEdge(a,b).getTravellingTime() + g.getEdge(b,c).getTravellingTime() + g.getEdge(c,d).getTravellingTime();
     }
 
 
-    public void fordfulk () {
+    public void fordfulk () { //https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm
         int s = 0;
         int t = graph.nextValidKey();
         graph.setNode(s, new Node(0,0,0));
