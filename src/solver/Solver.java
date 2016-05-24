@@ -136,28 +136,30 @@ public class Solver {
             LinkedList<Integer> right = new LinkedList<>();
             for (int s : suppliers) {
                 if (graph.getEdge(s, n).getCapacity() != 0) {
-                    int v = graph.nextValidKey();
-                    leftPlatforms.add(v);
-                    graph.setNode(v, new Node(0, 0, 0)); // add a left platform
-                    System.out.println(s + "->" + v + "\n");
-					if(graph.getEdge(s,n).getCapacity() != 0)
-                        graph.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
-                    left.add(v);
+
+					if(graph.getEdge(s,n).getCapacity() != 0) {
+						int v = graph.nextValidKey();
+						leftPlatforms.add(v);
+						graph.setNode(v, new Node(0, 0, 0)); // add a left platform
+						System.out.println(s + "->" + v + "\n");
+						graph.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
+						left.add(v);
+					}
                 }
                 //oldPlatforms.remove(n);
             }
 
             System.out.println(clients);
             for(int c : clients) {
+                if(graph.getEdge(n,c).getCapacity() != 0) {
                     int v = graph.nextValidKey();
-                    rightPlatforms.add(v);
-                    graph.setNode(v, new Node(0, 0, 0)); // add a right platform
-                    System.out.println();
                     System.out.println(v + "->" + c);
                     System.out.println(n);
-                    if(graph.getEdge(n,c).getCapacity() != 0)
-                        graph.setEdge(v,c, new Edge(graph.getEdge(n, c)));
+                    rightPlatforms.add(v);
+                    graph.setNode(v, new Node(0, 0, 0)); // add a right platform
+                    graph.setEdge(v, c, new Edge(graph.getEdge(n, c)));
                     right.add(v);
+                }
             }
             for(int l : left) {
                 for(int r : right) {
@@ -174,7 +176,7 @@ public class Solver {
             graph.removeNode(n);
         }
 
-        //System.out.println(leftPlatforms);
+        System.out.println(leftPlatforms);
         System.out.println(graph);
 
 	}
@@ -193,14 +195,7 @@ public class Solver {
         return max;
     }
 
-    public double getTime(Graph g, int a, int b, int c, int d) { //return time of a path including edge existence.
-        double time = 0;
-        if(g.getInEdges(b) != null)
-            time += g.getEdge(a,b).getTravellingTime();
-        if(g.getInEdges(c) != null)
-            time += g.getEdge(b,c).getTravellingTime();
-        if(g.getInEdges(d) != null)
-            time += g.getEdge(c,d).getTravellingTime();
+    public double getTime(Graph g, int a, int b, int c, int d) { //return time of a path
         return g.getEdge(a,b).getTravellingTime() + g.getEdge(b,c).getTravellingTime() + g.getEdge(c,d).getTravellingTime();
     }
 
