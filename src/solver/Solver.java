@@ -7,6 +7,10 @@ import graph.Node;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 
@@ -15,6 +19,7 @@ public class Solver {
 	private int maxTime;
 	private long computationTime, initTime, improvementTime, readingTime;
 	private LinkedList<Integer> oldPlatforms, leftPlatforms, rightPlatforms, suppliers, clients;
+	private HashMap<Integer, Integer> platformMap;
 	
 	public Solver() {
 		maxTime = -1;
@@ -28,6 +33,7 @@ public class Solver {
 		suppliers = new LinkedList<>();
 		clients = new LinkedList<>();
 		oldPlatforms = new LinkedList<>();
+		platformMap = new HashMap<>();
 	}
 
 	public void solve(String problemFile, long computationTime) {
@@ -36,6 +42,7 @@ public class Solver {
 		suppliers = new LinkedList<>();
 		clients = new LinkedList<>();
 		oldPlatforms = new LinkedList<>();
+		platformMap = new HashMap<>();
 		this.computationTime = computationTime;
 		
 		//starting time counter
@@ -47,14 +54,15 @@ public class Solver {
 			System.out.println("Total demand is not null, the problem is not feasable.");
 			return;
 		}
-		System.out.print(graph);
+		//System.out.print(graph);
 		readingTime = System.currentTimeMillis() - start;
 		System.out.println("(reading time = " + readingTime + ")-----------------------------------------");
 		
 		//build an initial solution. this step is always completed even it exceeds the time limit.
 		System.out.println("FINDING AN INITIAL SOLUTION--------------------------------");
-        separatePlatforms();
-
+        int leftdemand = fillEdges(separatePlatforms());
+        System.out.println("Remaining demand not yet answered : " + leftdemand);
+        //System.out.print(graph);
 		//TODO init solution ....
 		initTime = System.currentTimeMillis() - start - readingTime;
 		System.out.println("(init time = " + initTime + ")-------------------------------------------");
@@ -138,71 +146,117 @@ public class Solver {
 		return totalDemand;
 	}
 
-	private void separatePlatforms() {
+	private LinkedList<ArrayList<Integer>> separatePlatforms() {
+		System.out.println("SEPARATING PLATFORMS :");
+		LinkedList<ArrayList<Integer>> newEdges = new LinkedList<>();
+		int test0 = 0, test1 = 0;
+		
         for (int n : oldPlatforms) {
             LinkedList<Integer> left = new LinkedList<>();
             LinkedList<Integer> right = new LinkedList<>();
-            for (int s : suppliers) {
-				if(graph.getEdge(s,n).getCapacity() != 0) {
+            for (int s : graph.getInEdges(n)) {
+				if(graph.containsEdge(s, n)) {
 					int v = graph.nextValidKey();
 					leftPlatforms.add(v);
 					graph.setNode(v, new Node(0, 0, 0)); // add a left platform
-					System.out.println(s + "->" + v + "\n");
 					graph.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
 					left.add(v);
+	            	platformMap.put(v, n);
 				}
             }
-
-            System.out.println(clients);
-            for(int c : clients) {
-                if(graph.getEdge(n,c).getCapacity() != 0) {
+            for(int c : graph.getOutEdges(n)) {
+                if(graph.containsEdge(n, c)) {
                     int v = graph.nextValidKey();
-                    System.out.println(v + "->" + c);
-                    System.out.println(n);
                     rightPlatforms.add(v);
                     graph.setNode(v, new Node(0, 0, 0)); // add a right platform
                     graph.setEdge(v, c, new Edge(graph.getEdge(n, c)));
+                    test0 = v;
+                    test1 = c;
                     right.add(v);
+                	platformMap.put(v, n);
                 }
             }
             for(int l : left) {
                 for(int r : right) {
                     graph.setEdge(l, r, new Edge(Integer.MAX_VALUE, 0, graph.getNode(n).getUnitCost(), graph.getNode(n).getTransboardingTime()));
+                    int maxFlow = getPathCapacity(graph.getInEdges(l).getFirst(),
+                    		l, r, graph.getOutEdges(r).getFirst());
+                    graph.getEdge(l, r).setCapacity(maxFlow);
                     int sup = graph.getInEdges(l).getFirst(); //get the supplier
                     int cl = graph.getOutEdges(r).getFirst(); //get the client
-                    if(getTime(graph, sup, l, r, cl) > maxTime) { //test travelling + transboarding time between the two nodes
-                        graph.removeNode(l);
+                    if(getTime(sup, l, r, cl) > maxTime) { //test travelling + transboarding time between the two nodes
+                    	graph.removeNode(l);
                         graph.removeNode(r);
+                    } else {
+                    	newEdges.add(new ArrayList<Integer>(2));
+                    	newEdges.getLast().add(0, l);
+                    	newEdges.getLast().add(1, r);
                     }
-
                 }
             }
             graph.removeNode(n);
+            System.out.println(n + " is now " + left + right);
         }
-
-        System.out.println(leftPlatforms);
-        System.out.println(graph);
-
+        
+        return newEdges;
 	}
 
-
-
-    private int getCap(Graph g, int a, int b, int c, int d) { //get capacity and return the minimum maximum capacity of the path
+    private int getPathCapacity(int a, int b, int c, int d) { //return the maximum capacity of the path
         int max = 0;
-        if(g.getInEdges(b) != null)
-            max = ((Edge) g.getEdge(a,b)).getCapacity();
-        max = (g.getInEdges(c) != null && ((Edge) g.getEdge(b,c)).getCapacity() < max ? ((Edge) g.getEdge(b,c)).getCapacity() : max); //version ternaire
-
-        if(g.getInEdges(d) != null && ((Edge)g.getEdge(c,d)).getCapacity() < max)
-            max = ((Edge)g.getEdge(c,d)).getCapacity(); // version normale
-
+        
+        max = Math.min(graph.getEdge(a, b).getAvailableFlow(),
+        			graph.getEdge(b, c).getAvailableFlow());
+        max = Math.min(max, graph.getEdge(c, d).getAvailableFlow());
+        max = Math.min(max, -graph.getNode(a).getDemand());
+        max = Math.min(max, graph.getNode(d).getDemand());
+        
         return max;
     }
 
-    private double getTime(Graph g, int a, int b, int c, int d) { //return time of a path
-        return ((Edge)g.getEdge(a,b)).getTravellingTime() + ((Edge)g.getEdge(b,c)).getTravellingTime() + ((Edge)g.getEdge(c,d)).getTravellingTime();
+    private double getTime(int a, int b, int c, int d) { //return time of a path
+        return graph.getEdge(a,b).getTravellingTime() + graph.getEdge(b,c).getTravellingTime() + graph.getEdge(c,d).getTravellingTime();
     }
-
+    
+    public double getTotalCost() {
+    	double total = 0;
+    	
+    	for (Integer i : graph.getNodeKeys()) {
+    		for (Integer j : graph.getNodeKeys()) {
+        		if (graph.containsEdge(i, j)) {
+        			total += graph.getEdge(i, j).getCost();
+        		}
+        	}
+    	}
+    	
+    	return total;
+    }
+    
+    private int fillEdges(LinkedList<ArrayList<Integer>> platformEdges) { //initial solution for Ford-Fulkerson
+    	System.out.println("FILLING GRAPH FLOW :");
+    	int totalDemand = 0;
+    	
+    	for (Integer i : clients) {
+			totalDemand += graph.getNode(i).getDemand();
+		}
+    	
+    	System.out.println("total demand before filling : " + totalDemand);
+    	System.out.println("filling ...");
+    	for (ArrayList<Integer> p : platformEdges) {
+			int s = graph.getInEdges(p.get(0)).getFirst();
+			int c = graph.getOutEdges(p.get(1)).getFirst();
+			int maxFlow = getPathCapacity(s, p.get(0), p.get(1), c);
+			if (maxFlow != 0) {
+				totalDemand -= maxFlow;
+				graph.getEdge(s, p.get(0)).setNbrProduct(graph.getEdge(s, p.get(0)).getNbrProduct() + maxFlow);
+				graph.getEdge(p.get(0), p.get(1)).setNbrProduct(graph.getEdge(p.get(0), p.get(1)).getNbrProduct() + maxFlow);
+				graph.getEdge(p.get(1), c).setNbrProduct(graph.getEdge(p.get(1), c).getNbrProduct() + maxFlow);
+				graph.getNode(s).setDemand(graph.getNode(s).getDemand() + maxFlow);
+				graph.getNode(c).setDemand(graph.getNode(c).getDemand() - maxFlow);
+			}
+		}
+    	
+    	return totalDemand;    	
+    }
 
     private void fordfulk () { //https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm
         int s = 0;

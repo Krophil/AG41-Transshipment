@@ -1,7 +1,7 @@
 package graph;
 
 public class Node {
-	private final int demand;
+	private int demand;
 	private final double unitCost, transboardingTime;
 
 	public Node(int demand, double unitCost, double transboardingTime) {
@@ -12,6 +12,10 @@ public class Node {
 
 	public int getDemand() {
 		return demand;
+	}
+	
+	public void setDemand(int d) {
+		demand = d;
 	}
 
 	public double getUnitCost() {

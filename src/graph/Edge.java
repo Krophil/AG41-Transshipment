@@ -1,7 +1,7 @@
 package graph;
 
 public class Edge implements EdgeType {
-	private final int capacity;
+	private int capacity;
 	private final double fixedCost, unitCost, travellingTime;
 	private int nbrProduct;
 	
@@ -21,8 +21,16 @@ public class Edge implements EdgeType {
         this.nbrProduct = 0;
     }
 	
+	public int getAvailableFlow() {
+		return capacity - nbrProduct;
+	}
+	
 	public int getCapacity() {
 		return capacity;
+	}
+	
+	public void setCapacity(int c) {
+		capacity = c;
 	}
 
 	public double getFixedCost() {
