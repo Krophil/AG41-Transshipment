@@ -1,10 +1,8 @@
 package graph;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.lang.Math;
 
 public class Graph<N, E extends EdgeType> {
 	private HashMap<Integer, N> nodes;
