@@ -43,7 +43,10 @@ public class Solver {
 
 		//reading input file and building the corresponding graph
 		System.out.println("READING FILE------------------------------------------------");
-		loadProblemFile(problemFile);
+		if (loadProblemFile(problemFile) != 0) {
+			System.out.println("Total demand is not null, the problem is not feasable.");
+			return;
+		}
 		System.out.print(graph);
 		readingTime = System.currentTimeMillis() - start;
 		System.out.println("(reading time = " + readingTime + ")-----------------------------------------");
@@ -69,8 +72,9 @@ public class Solver {
 		//TODO
 	}
 	
-	private void loadProblemFile(String file) {
+	private int loadProblemFile(String file) {
 		BufferedReader br = null;
+		int totalDemand = 0;
 		try {
 			String currLine;
 			int nbrNodes, nbrEdges;
@@ -92,7 +96,8 @@ public class Solver {
 				graph.setNode(Integer.valueOf(parse[1]), new Node(Integer.valueOf(parse[4]),
 								Double.valueOf(parse[5]), Double.valueOf(parse[6])));
 				int index = Integer.valueOf(parse[1]);
-				int demand = graph.getNode(Integer.valueOf(parse[1])).getDemand();
+				int demand = graph.getNode(index).getDemand();
+				totalDemand += demand;
 				if (demand > 0)
 					clients.add(index);
 				else if (demand < 0)
@@ -106,9 +111,11 @@ public class Solver {
 			for (int i = 0; i < nbrEdges; i++) { //edges
 				currLine = br.readLine();
 				String[] parse = currLine.split(" ");
-				graph.setEdge(Integer.valueOf(parse[2]), Integer.valueOf(parse[3]),
+				if (Integer.valueOf(parse[4]) > 0) { //checking positivity of the edge capacity
+					graph.setEdge(Integer.valueOf(parse[2]), Integer.valueOf(parse[3]),
 								new Edge(Integer.valueOf(parse[4]), Double.valueOf(parse[5]),
 										Double.valueOf(parse[6]), Double.valueOf(parse[7])));
+				}
 			}
 		} catch (IndexOutOfBoundsException e) {
 			System.out.println("Problem file structure is not respected.");
@@ -128,6 +135,7 @@ public class Solver {
 				ex.printStackTrace();
 			}
 		}
+		return totalDemand;
 	}
 
 	private void separatePlatforms() {
