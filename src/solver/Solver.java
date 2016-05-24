@@ -182,17 +182,17 @@ public class Solver {
     public int getCap(Graph g, int a, int b, int c, int d) { //get capacity and return the minimum maximum capacity of the path
         int max = 0;
         if(g.getInEdges(b) != null)
-            g.getEdge(a,b).getCapacity();
-        max = (g.getInEdges(c) != null && g.getEdge(b,c).getCapacity() < max ? g.getEdge(b,c).getCapacity() : max); //version ternaire
+            max = ((Edge) g.getEdge(a,b)).getCapacity();
+        max = (g.getInEdges(c) != null && ((Edge) g.getEdge(b,c)).getCapacity() < max ? ((Edge) g.getEdge(b,c)).getCapacity() : max); //version ternaire
 
-        if(g.getInEdges(d) != null && g.getEdge(c,d).getCapacity() < max)
-            max = g.getEdge(c,d).getCapacity(); // version normale
+        if(g.getInEdges(d) != null && ((Edge)g.getEdge(c,d)).getCapacity() < max)
+            max = ((Edge)g.getEdge(c,d)).getCapacity(); // version normale
 
         return max;
     }
 
     public double getTime(Graph g, int a, int b, int c, int d) { //return time of a path
-        return g.getEdge(a,b).getTravellingTime() + g.getEdge(b,c).getTravellingTime() + g.getEdge(c,d).getTravellingTime();
+        return ((Edge)g.getEdge(a,b)).getTravellingTime() + ((Edge)g.getEdge(b,c)).getTravellingTime() + ((Edge)g.getEdge(c,d)).getTravellingTime();
     }
 
 
