@@ -179,7 +179,7 @@ public class Solver {
 
 
 
-    public int getCap(Graph g, int a, int b, int c, int d) { //get capacity and return the minimum maximum capacity of the path
+    private int getCap(Graph g, int a, int b, int c, int d) { //get capacity and return the minimum maximum capacity of the path
         int max = 0;
         if(g.getInEdges(b) != null)
             max = ((Edge) g.getEdge(a,b)).getCapacity();
@@ -191,12 +191,12 @@ public class Solver {
         return max;
     }
 
-    public double getTime(Graph g, int a, int b, int c, int d) { //return time of a path
+    private double getTime(Graph g, int a, int b, int c, int d) { //return time of a path
         return ((Edge)g.getEdge(a,b)).getTravellingTime() + ((Edge)g.getEdge(b,c)).getTravellingTime() + ((Edge)g.getEdge(c,d)).getTravellingTime();
     }
 
 
-    public void fordfulk () { //https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm
+    private void fordfulk () { //https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm
         int s = 0;
         int t = graph.nextValidKey();
         graph.setNode(s, new Node(0,0,0));
