@@ -134,6 +134,24 @@ public class Graph<N, E extends EdgeType> {
 		
 		return g;
 	}
+
+    public Graph<N, E> getResidualEdges() {
+        for (int i : nodes.keySet()) {
+            for (int j : nodes.keySet()) {
+                E e = getEdge(i, j);
+                if (e != null) {
+                    E opp = (E) e.getOpposite();
+                    E rem = (E) e.getRemaining();
+                    if (opp != null)
+                        this.setEdge(j, i, opp);
+                    if (rem != null)
+                        this.setEdge(i, j, rem);
+                }
+            }
+        }
+
+        return this;
+    }
 	
 	public String toString() {
 		String s = "NODES :\n";

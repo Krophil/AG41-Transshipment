@@ -7,11 +7,7 @@ import graph.Node;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 
 
 public class Solver {
@@ -62,6 +58,7 @@ public class Solver {
 		System.out.println("FINDING AN INITIAL SOLUTION--------------------------------");
         int leftdemand = fillEdges(separatePlatforms());
         System.out.println("Remaining demand not yet answered : " + leftdemand);
+        System.out.println("Total cost : " + getTotalCost());
         //System.out.print(graph);
 		//TODO init solution ....
 		initTime = System.currentTimeMillis() - start - readingTime;
@@ -69,10 +66,13 @@ public class Solver {
 		
 		//find a better solution as long as there is time left
 		System.out.println("IMPROVING SOLUTION------------------------------------------");
-		while (System.currentTimeMillis() - start < computationTime) {
-			//TODO improving the solution ...
+
+        fordfulk();
+        while (System.currentTimeMillis() - start < computationTime) {
+            //TODO improving the solution ...
 		}
-		improvementTime = System.currentTimeMillis() - start - initTime - readingTime;
+
+        improvementTime = System.currentTimeMillis() - start - initTime - readingTime;
 		System.out.println("(improvement time = " + improvementTime + ")------------------------------------");
 	}
 	
@@ -213,6 +213,13 @@ public class Solver {
         return max;
     }
 
+    private double getPathCost(List<Integer> path, int i) {
+        int sum = 0;
+        for(int j = 0 ; j < path.size()-2 ; j++)
+            sum += graph.getEdge(path.get(j), path.get(j+1)).getUnitCost()*i + graph.getEdge(path.get(j), path.get(j+1)).getCost();
+        return sum;
+    }
+
     private double getTime(int a, int b, int c, int d) { //return time of a path
         return graph.getEdge(a,b).getTravellingTime() + graph.getEdge(b,c).getTravellingTime() + graph.getEdge(c,d).getTravellingTime();
     }
@@ -268,9 +275,98 @@ public class Solver {
 
         for(int n : clients)
             graph.setEdge(n, t, new Edge(graph.getNode(n).getDemand(), 0, 0, 0));
-        Graph resid = graph.getResidualGraph();
+        Graph<Node, Edge> resid = graph.getResidualGraph();
+        graph.getResidualEdges();
+        LinkedList<Integer> d = new LinkedList<>();
+        cycleDfs(graph, s);
+        System.out.println(d);
+    }
+
+	private LinkedList<LinkedList<Integer>> cycleDfs(Graph<Node, Edge> g, int v) {
+        LinkedList<Integer> d = new LinkedList<>(); //d for discovered
+        Stack<Integer> s = new Stack<>();
+        LinkedList<LinkedList<Integer>> cycles = new LinkedList<>();
+        s.push(v);
+        int o;
+        while (!s.isEmpty()) {
+            v = s.pop();
+            System.out.println("in my stack, I have... " + v);
+            if (!d.contains(v)) { //simple dfs
+                d.add(v);
+                for (int w : graph.getOutEdges(v)) {
+                    //System.out.println(w);
+                    s.push(w);
+                    System.out.println("Out edges of " + v + " : " + w);
+                }
+            } else { //part added to register cycles
+                LinkedList<Integer> c = new LinkedList<>();
+                if (v != 0) {
+                    o = d.getLast();
+                    System.out.println(s);
+                    System.out.println(d);
+                    System.out.println("v = " + v);
+                    System.out.println("beginning of my cycle : " + o);
+                    c.add(o);
+                    int i = d.size()-2; //because the last one of d is already in c
+                    while (o != v) {
+                        o = d.get(i);
+                        System.out.println(d.get(i));
+                        c.add(o);
+                        i--;
+                    }
+                    cycles.add(c); //c added to the linked list of cycles
+                    System.out.println(cycles);
+                }
+            }
+
+        }
+        return cycles;
+    }
+
+    private void coutmin(Graph<Node, Edge> g) {
+        int s = 0;
+        int t = graph.nextValidKey();
+        LinkedList<LinkedList<Integer>> cycles = new LinkedList<>();
+
+        graph.setNode(s, new Node(0,0,0)); //source
+        graph.setNode(t, new Node(0,0,0)); //target
+        for(int n : suppliers)
+            graph.setEdge(s, n, new Edge(-(graph.getNode(n).getDemand()), 0, 0, 0));
+
+        for(int n : clients)
+            graph.setEdge(n, t, new Edge(graph.getNode(n).getDemand(), 0, 0, 0));
+
+        graph.getResidualEdges(); // residual edges added directly in the graph
 
 
+        int i = 1;
+        double min = Double.POSITIVE_INFINITY;
+        LinkedList<Integer> bPath = new LinkedList<>();
+
+        //Calculate Graph for a translation of i products
+        for(int a : g.getOutEdges(0)) {
+            for(int b : g.getOutEdges(a)) {
+                for(int c : g.getOutEdges(b)) {
+                    for(int d : g.getOutEdges(c)) {
+                        List<Integer> l = Arrays.asList(a,b,c,d);
+                        double test = getPathCost(l,i);
+                        if(min>test) {
+                            min = test;
+                            if(!bPath.isEmpty())
+                                bPath.removeAll(bPath);
+                            bPath.addAll(Arrays.asList(a,b,c,d)); //register the best path for optimization
+                        }
+                    }
+                }
+            }
+        }
+
+        //Search of negative cycle
+        cycles = cycleDfs(g, s); //every cycle in cycles
+        for(LinkedList<Integer> c : cycles) {
+            //List<Integer> C = new ArrayList<String>(c);
+            //if(getPathCost(C), i);
+        }
     }
 
 	public long getComputationTime() {
