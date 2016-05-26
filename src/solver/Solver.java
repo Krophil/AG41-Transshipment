@@ -16,6 +16,7 @@ public class Solver {
 	private long computationTime, initTime, improvementTime, readingTime;
 	private LinkedList<Integer> oldPlatforms, leftPlatforms, rightPlatforms, suppliers, clients;
 	private HashMap<Integer, Integer> platformMap;
+    private LinkedList<LinkedList<Integer>> cycles = new LinkedList<>();
 	
 	public Solver() {
 		maxTime = -1;
@@ -67,7 +68,7 @@ public class Solver {
 		//find a better solution as long as there is time left
 		System.out.println("IMPROVING SOLUTION------------------------------------------");
 
-        fordfulk();
+        coutmin(graph);
         while (System.currentTimeMillis() - start < computationTime) {
             //TODO improving the solution ...
 		}
@@ -293,68 +294,60 @@ public class Solver {
 		return g;
 	}
 
-    private void fordfulk () { //https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm
-        int s = 0;
-        int t = graph.nextValidKey();
-        graph.setNode(s, new Node(0,0,0));
-        graph.setNode(t, new Node(0,0,0));
-        for(int n : suppliers)
-            graph.setEdge(s, n, new Edge(-(graph.getNode(n).getDemand()), 0, 0, 0));
 
-        for(int n : clients)
-            graph.setEdge(n, t, new Edge(graph.getNode(n).getDemand(), 0, 0, 0));
-        Graph<Node, Edge> resid = graph.getResidualGraph();
-        graph.getResidualEdges();
-        LinkedList<Integer> d = new LinkedList<>();
-        cycleDfs(graph, s);
-        System.out.println(d);
+    private void GraphCycles(Graph<Node,Edge> g) {
+        LinkedList<Integer> visited = new LinkedList<>();
+        LinkedList<Integer> candidates = new LinkedList<>();
+        for(int v : graph.getNodeKeys()){
+            if(!visited.contains(v) && !candidates.contains(v))
+                dfs(g, v, visited, candidates);
+        }
     }
 
-	private LinkedList<LinkedList<Integer>> cycleDfs(Graph<Node, Edge> g, int v) {
-        LinkedList<Integer> d = new LinkedList<>(); //d for discovered
-        Stack<Integer> s = new Stack<>();
-        LinkedList<LinkedList<Integer>> cycles = new LinkedList<>();
-        s.push(v);
-        int o;
-        while (!s.isEmpty()) {
-            v = s.pop();
-            System.out.println("in my stack, I have... " + v);
-            if (!d.contains(v)) { //simple dfs
-                d.add(v);
-                for (int w : graph.getOutEdges(v)) {
-                    //System.out.println(w);
-                    s.push(w);
-                    System.out.println("Out edges of " + v + " : " + w);
-                }
-            } else { //part added to register cycles
+    private void dfs(Graph<Node, Edge> g, int v, LinkedList<Integer> visited, LinkedList<Integer> candidates) {
+        candidates.add(v);
+        for(int adj : g.getOutEdges(v)) {
+            if(candidates.contains(adj)) {
+                int i = v;
                 LinkedList<Integer> c = new LinkedList<>();
-                if (v != 0) {
-                    o = d.getLast();
-                    System.out.println(s);
-                    System.out.println(d);
-                    System.out.println("v = " + v);
-                    System.out.println("beginning of my cycle : " + o);
-                    c.add(o);
-                    int i = d.size()-2; //because the last one of d is already in c
-                    while (o != v) {
-                        o = d.get(i);
-                        System.out.println(d.get(i));
-                        c.add(o);
-                        i--;
-                    }
-                    cycles.add(c); //c added to the linked list of cycles
-                    System.out.println(cycles);
-                }
+                do {
+                    c.add(i);
+                    i = g.getNode(i).getParent();
+                } while (i != adj);
+                c.add(adj);
+                if(!sameCycles(c))
+                    cycles.add(c);
+            } else {
+                g.getNode(adj).setParent(v);
+                dfs(g, adj, visited, candidates);
             }
-
         }
-        return cycles;
+        candidates.remove(candidates.indexOf(v));
+        visited.add(v);
+
+    }
+
+    private boolean sameCycles(LinkedList<Integer> a) {
+        boolean hasall = true;
+        for(LinkedList<Integer> b : cycles) {
+            if(b.size() == a.size()) {
+                boolean found = true;
+                for (int it : a) {
+                    if (!b.contains(it)) {
+                        found = false;
+                        break;
+                    }
+                }
+                if (found)
+                    return true;
+            }
+        }
+        return false;
     }
 
     private void coutmin(Graph<Node, Edge> g) {
         int s = 0;
         int t = graph.nextValidKey();
-        LinkedList<LinkedList<Integer>> cycles = new LinkedList<>();
 
         graph.setNode(s, new Node(0,0,0)); //source
         graph.setNode(t, new Node(0,0,0)); //target
@@ -363,16 +356,21 @@ public class Solver {
 
         for(int n : clients)
             graph.setEdge(n, t, new Edge(graph.getNode(n).getDemand(), 0, 0, 0));
-
-        graph.getResidualEdges(); // residual edges added directly in the graph
-
+        System.out.println(graph);
+        Graph<Node,Edge> resid = new Graph<>();  // residual edges added directly in the graph
+		resid = getResidualGraph();
+		System.out.println(resid);
+        //cycles = cycleDfs(resid, 1);
+        //System.out.println(cycles);
+        GraphCycles(resid);
+        System.out.println(cycles);
 
         int i = 1;
         double min = Double.POSITIVE_INFINITY;
         LinkedList<Integer> bPath = new LinkedList<>();
 
         //Calculate Graph for a translation of i products
-        for(int a : g.getOutEdges(0)) {
+        /*for(int a : g.getOutEdges(0)) {
             for(int b : g.getOutEdges(a)) {
                 for(int c : g.getOutEdges(b)) {
                     for(int d : g.getOutEdges(c)) {
@@ -387,14 +385,14 @@ public class Solver {
                     }
                 }
             }
-        }
+        }*/
 
         //Search of negative cycle
-        cycles = cycleDfs(g, s); //every cycle in cycles
-        for(LinkedList<Integer> c : cycles) {
+        //cycles = cycleDfs(resid, s); //every cycle in cycles
+        //for(LinkedList<Integer> c : cycles) {
             //List<Integer> C = new ArrayList<String>(c);
             //if(getPathCost(C), i);
-        }
+        //}
     }
 
 	public long getComputationTime() {
