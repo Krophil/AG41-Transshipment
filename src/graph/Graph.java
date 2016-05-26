@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class Graph<N, E extends EdgeType> {
+public class Graph<N, E> {
 	private HashMap<Integer, N> nodes;
 	private HashMap<Integer, HashMap<Integer, E>> edges;
 	
@@ -109,49 +109,6 @@ public class Graph<N, E extends EdgeType> {
 	public boolean containsEdge(int i, int j) {
 		return edges.containsKey(i) && edges.get(i).containsKey(j);
 	}
-	
-	public Graph<N, E> getResidualGraph() {
-		Graph<N, E> g = new Graph<>();
-		int ind = 0;
-		
-		for (N n : nodes.values()) {
-			g.setNode(ind++, n);
-		}
-		
-		for (int i : nodes.keySet()) {
-			for (int j : nodes.keySet()) {
-				E e = getEdge(i, j);
-				if (e != null) {
-					E opp = (E) e.getOpposite();
-					E rem = (E) e.getRemaining();
-					if (opp != null)
-						g.setEdge(j, i, opp);
-					if (rem != null)
-						g.setEdge(i, j, rem);
-				}
-			}
-		}
-		
-		return g;
-	}
-
-    public Graph<N, E> getResidualEdges() {
-        for (int i : nodes.keySet()) {
-            for (int j : nodes.keySet()) {
-                E e = getEdge(i, j);
-                if (e != null) {
-                    E opp = (E) e.getOpposite();
-                    E rem = (E) e.getRemaining();
-                    if (opp != null)
-                        this.setEdge(j, i, opp);
-                    if (rem != null)
-                        this.setEdge(i, j, rem);
-                }
-            }
-        }
-
-        return this;
-    }
 	
 	public String toString() {
 		String s = "NODES :\n";

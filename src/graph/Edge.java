@@ -1,6 +1,6 @@
 package graph;
 
-public class Edge implements EdgeType {
+public class Edge {
 	private int capacity;
 	private final double fixedCost, unitCost, travellingTime;
 	private int nbrProduct;
@@ -67,23 +67,5 @@ public class Edge implements EdgeType {
 	public String toString() {
 		return "products=" + nbrProduct + "/" + capacity + ";cost=" + getCost() 
 				+ "(" + fixedCost + " + x" + unitCost + ")" + ";time=" + travellingTime + "\n";
-	}
-	
-	@Override
-	public Edge getOpposite() {
-		if (nbrProduct == 0)
-			return null;
-		else {
-			return new Edge(nbrProduct, -fixedCost, -unitCost, -travellingTime);
-		}
-	}
-
-	@Override
-	public EdgeType getRemaining() {
-		if (capacity == nbrProduct)
-			return null;
-		else {
-			return new Edge(capacity - nbrProduct, fixedCost, unitCost, travellingTime);
-		}
 	}
 }

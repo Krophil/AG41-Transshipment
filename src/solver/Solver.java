@@ -264,6 +264,34 @@ public class Solver {
     	
     	return totalDemand;    	
     }
+    
+    public Graph<Node, Edge> getResidualGraph() {
+		Graph<Node, Edge> g = new Graph<>();
+		
+		for (int n : graph.getNodeKeys()) {
+			g.setNode(n, graph.getNode(n));
+		}
+		
+		for (int i : graph.getNodeKeys()) {
+			for (int j : graph.getNodeKeys()) {
+				if (graph.containsEdge(i, j)) {
+					Edge e = graph.getEdge(i, j);
+					if (e.getNbrProduct() > 0) {
+						Edge opp = new Edge(e.getNbrProduct(), -e.getFixedCost(), 
+											-e.getUnitCost(), -e.getTravellingTime());
+						g.setEdge(j, i, opp);
+					}
+					if (e.getCapacity() > e.getNbrProduct()) {
+						Edge rem = new Edge(e.getCapacity() - e.getNbrProduct(), e.getFixedCost(), 
+								e.getUnitCost(), e.getTravellingTime());
+						g.setEdge(i, j, rem);
+					}
+				}
+			}
+		}
+		
+		return g;
+	}
 
     private void fordfulk () { //https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm
         int s = 0;
