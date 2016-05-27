@@ -400,27 +400,27 @@ public class Solver {
                     cost = 0;
                     for (int i = 1; i < c.size(); i++) {
                         //System.out.println(c.get(i-1)+" "+c.get(i));
-                        cost += resid.getEdge(c.get(i - 1), c.get(i)).getCost() * maxCap;
+                        cost += resid.getEdge(c.get(i - 1), c.get(i)).getCost() * maxCap; //add cost linked to products
                         //System.out.println(maxCap);
 
-                        if (resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost() > 0) {
+                        if (resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost() > 0) { //check if it is an add or a remove on the edge
                             if (graph.getEdge(c.get(i - 1), c.get(i)).getNbrProduct() == 0) //don't forget fixed cost to add if edge unused
                                 cost += resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost();
                         } else {
                             if (resid.getEdge(c.get(i - 1), c.get(i)).getCapacity() == maxCap)
-                                cost += resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost();
+                                cost -= resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost(); //remove fixed cost if we empty the edge
                         }
                     }
                     System.out.println(cost);
                     if (cost < 0) {
                         negativeCost = true;
                         for(int i = 1 ; i<c.size() ; i++) {
-                            if(graph.containsEdge(c.get(i-1),c.get(i))) {
-                                System.out.println("before"+graph.getEdge(c.get(i-1), c.get(i)).setNbrProduct(graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct()+maxCap));
+                            if(graph.containsEdge(c.get(i-1),c.get(i))) { //is it a residual edge or an edge from the usual graph
+                                //System.out.println("before"+graph.getEdge(c.get(i-1), c.get(i)).setNbrProduct(graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct()+maxCap));
                                 graph.getEdge(c.get(i-1), c.get(i)).setNbrProduct(graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct()+maxCap);
-                                System.out.println("before"+graph.getEdge(c.get(i-1), c.get(i)).setNbrProduct(graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct()+maxCap));
+                                //System.out.println("before"+graph.getEdge(c.get(i-1), c.get(i)).setNbrProduct(graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct()+maxCap));
 
-                            } else {
+                            } else { //if it is a residual edge
                                 graph.getEdge(c.get(i-1), c.get(i)).setNbrProduct(graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct()-maxCap);
                             }
                         }
