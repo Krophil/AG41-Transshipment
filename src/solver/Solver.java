@@ -68,10 +68,12 @@ public class Solver {
 		//find a better solution as long as there is time left
 		System.out.println("IMPROVING SOLUTION------------------------------------------");
 
-        coutmin(graph);
+
         while (System.currentTimeMillis() - start < computationTime) {
             //TODO improving the solution ...
-		}
+            coutmin(graph);
+        }
+        System.out.println(getTotalCost());
 
         improvementTime = System.currentTimeMillis() - start - initTime - readingTime;
 		System.out.println("(improvement time = " + improvementTime + ")------------------------------------");
@@ -214,7 +216,16 @@ public class Solver {
         return max;
     }
 
-    private double getPathCost(List<Integer> path, int i) {
+    private int getMaxCapacity(LinkedList<Integer> c) {
+        int max = Integer.MAX_VALUE;
+        for(int i = 1 ; i<c.size() ; i++) {
+            max = Math.min(c.get(i-1),c.get(i));
+        }
+        return max;
+    }
+
+
+    private double getPathCost(LinkedList<Integer> path, int i) {
         int sum = 0;
         for(int j = 0 ; j < path.size()-2 ; j++)
             sum += graph.getEdge(path.get(j), path.get(j+1)).getUnitCost()*i + graph.getEdge(path.get(j), path.get(j+1)).getCost();
@@ -314,9 +325,14 @@ public class Solver {
                     c.add(i);
                     i = g.getNode(i).getParent();
                 } while (i != adj);
+
                 c.add(adj);
-                if(!sameCycles(c))
+                c.add(c.getFirst());
+                c = revertC(c);
+
+                if(!sameCycles(c)) {
                     cycles.add(c);
+                }
             } else {
                 g.getNode(adj).setParent(v);
                 dfs(g, adj, visited, candidates);
@@ -345,54 +361,73 @@ public class Solver {
         return false;
     }
 
+    private LinkedList<Integer> revertC (LinkedList<Integer> c) {
+        LinkedList<Integer> cp = new LinkedList<>();
+        do {
+            cp.addFirst(c.pop());
+        } while (!c.isEmpty());
+        //System.out.println(cp);
+        return cp;
+    }
+
     private void coutmin(Graph<Node, Edge> g) {
-        int s = 0;
-        int t = graph.nextValidKey();
+//        int s = 0;
+//        int t = graph.nextValidKey();
+//
+//        graph.setNode(s, new Node(0,0,0)); //source
+//        graph.setNode(t, new Node(0,0,0)); //target
+//        for(int n : suppliers)
+//            graph.setEdge(s, n, new Edge(-(graph.getNode(n).getDemand()), 0, 0, 0));
+//
+//        for(int n : clients)
+//            graph.setEdge(n, t, new Edge(graph.getNode(n).getDemand(), 0, 0, 0));
+        //System.out.println(graph);
+        Graph<Node,Edge> resid = getResidualGraph();
+		//System.out.println(resid);
 
-        graph.setNode(s, new Node(0,0,0)); //source
-        graph.setNode(t, new Node(0,0,0)); //target
-        for(int n : suppliers)
-            graph.setEdge(s, n, new Edge(-(graph.getNode(n).getDemand()), 0, 0, 0));
-
-        for(int n : clients)
-            graph.setEdge(n, t, new Edge(graph.getNode(n).getDemand(), 0, 0, 0));
-        System.out.println(graph);
-        Graph<Node,Edge> resid = new Graph<>();  // residual edges added directly in the graph
-		resid = getResidualGraph();
-		System.out.println(resid);
-        //cycles = cycleDfs(resid, 1);
-        //System.out.println(cycles);
+        //Search of negative cycles
         GraphCycles(resid);
-        System.out.println(cycles);
 
-        int i = 1;
-        double min = Double.POSITIVE_INFINITY;
-        LinkedList<Integer> bPath = new LinkedList<>();
+        int maxCap;
+        double cost = 0;
+        boolean negativeCost = true;
+        while (negativeCost) {
+            negativeCost = false;
+            for (LinkedList<Integer> c : cycles) {
+                //System.out.println(c);
+                if (c.size() > 3) {
+                    maxCap = getMaxCapacity(c);
+                    cost = 0;
+                    for (int i = 1; i < c.size(); i++) {
+                        //System.out.println(c.get(i-1)+" "+c.get(i));
+                        cost += resid.getEdge(c.get(i - 1), c.get(i)).getCost() * maxCap;
+                        //System.out.println(maxCap);
 
-        //Calculate Graph for a translation of i products
-        /*for(int a : g.getOutEdges(0)) {
-            for(int b : g.getOutEdges(a)) {
-                for(int c : g.getOutEdges(b)) {
-                    for(int d : g.getOutEdges(c)) {
-                        List<Integer> l = Arrays.asList(a,b,c,d);
-                        double test = getPathCost(l,i);
-                        if(min>test) {
-                            min = test;
-                            if(!bPath.isEmpty())
-                                bPath.removeAll(bPath);
-                            bPath.addAll(Arrays.asList(a,b,c,d)); //register the best path for optimization
+                        if (resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost() > 0) {
+                            if (graph.getEdge(c.get(i - 1), c.get(i)).getNbrProduct() == 0) //don't forget fixed cost to add if edge unused
+                                cost += resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost();
+                        } else {
+                            if (resid.getEdge(c.get(i - 1), c.get(i)).getCapacity() == maxCap)
+                                cost += resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost();
+                        }
+                    }
+                    System.out.println(cost);
+                    if (cost < 0) {
+                        negativeCost = true;
+                        for(int i = 1 ; i<c.size() ; i++) {
+                            if(graph.containsEdge(c.get(i-1),c.get(i))) {
+                                System.out.println("before"+graph.getEdge(c.get(i-1), c.get(i)).setNbrProduct(graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct()+maxCap));
+                                graph.getEdge(c.get(i-1), c.get(i)).setNbrProduct(graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct()+maxCap);
+                                System.out.println("before"+graph.getEdge(c.get(i-1), c.get(i)).setNbrProduct(graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct()+maxCap));
+
+                            } else {
+                                graph.getEdge(c.get(i-1), c.get(i)).setNbrProduct(graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct()-maxCap);
+                            }
                         }
                     }
                 }
             }
-        }*/
-
-        //Search of negative cycle
-        //cycles = cycleDfs(resid, s); //every cycle in cycles
-        //for(LinkedList<Integer> c : cycles) {
-            //List<Integer> C = new ArrayList<String>(c);
-            //if(getPathCost(C), i);
-        //}
+        }
     }
 
 	public long getComputationTime() {
