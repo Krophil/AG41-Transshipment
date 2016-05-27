@@ -397,20 +397,20 @@ public class Solver {
                 //System.out.println(c);
                 if (c.size() > 3) {
                     maxCap = getMaxCapacity(c);
-                    System.out.println(maxCap);
+                    //System.out.println(maxCap);
                     cost = 0;
                     for (int i = 1; i < c.size(); i++) {
                         //System.out.println(c.get(i-1)+" "+c.get(i));
                         cost += resid.getEdge(c.get(i - 1), c.get(i)).getCost() * maxCap; //add cost linked to products
                         //System.out.println(maxCap);
 
-                        /*if (resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost() > 0) { //check if it is an add or a remove on the edge
+                        if (resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost() > 0) { //check if it is an add or a remove on the edge
                             if (graph.getEdge(c.get(i - 1), c.get(i)).getNbrProduct() == 0) //don't forget fixed cost to add if edge unused
                                 cost += resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost();
                         } else {
                             if (resid.getEdge(c.get(i - 1), c.get(i)).getCapacity() == maxCap)
                                 cost -= resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost(); //remove fixed cost if we empty the edge
-                        }*/
+                        }
                     }
                     //System.out.println(cost);
                     if (cost < 0) {
