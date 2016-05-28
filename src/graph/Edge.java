@@ -57,7 +57,7 @@ public class Edge {
 	}
 	
 	public boolean setNbrProduct(int nbrProd) {
-		if (nbrProd < capacity && nbrProd >= 0) {
+		if (nbrProd <= capacity && nbrProd >= 0) {
 			nbrProduct = nbrProd;
 			return true;
 		}

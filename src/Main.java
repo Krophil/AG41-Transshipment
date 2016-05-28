@@ -6,7 +6,7 @@ public class Main {
 	public static void main(String[] args) {
 		if (args.length == 2) {
 			Solver solv = new Solver();
-			solv.solve(args[0], Integer.valueOf(args[1]));
+			solv.solve(args[0], Integer.valueOf(args[1])*1000);
 		} else if (args.length == 0){
 			System.out.println("Missing argument : Problem file name.");
 		} else if (args.length <= 1){

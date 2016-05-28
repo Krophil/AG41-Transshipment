@@ -33,7 +33,7 @@ public class Solver {
 		platformMap = new HashMap<>();
 	}
 
-	public void solve(String problemFile, long computationTime) {
+	public double solve(String problemFile, long computationTime) {
 		leftPlatforms = new LinkedList<>();
 		rightPlatforms = new LinkedList<>();
 		suppliers = new LinkedList<>();
@@ -46,27 +46,31 @@ public class Solver {
 		long start = System.currentTimeMillis();
 
 		//reading input file and building the corresponding graph
-		System.out.println("READING FILE------------------------------------------------");
+		System.out.println("READING FILE----------------------------------------------------------------");
 		if (loadProblemFile(problemFile) != 0) {
 			System.out.println("Total demand is not null, the problem is not feasable.");
-			return;
+			return -1;
 		}
 		//System.out.print(graph);
 		readingTime = System.currentTimeMillis() - start;
-		System.out.println("(reading time = " + readingTime + ")-----------------------------------------");
+		System.out.println("(reading time = " + readingTime + ")-------------------------------------------------------------");
 		
 		//build an initial solution. this step is always completed even it exceeds the time limit.
-		System.out.println("FINDING AN INITIAL SOLUTION--------------------------------");
+		System.out.println("FINDING AN INITIAL SOLUTION--------------------------------------------------");
         int leftdemand = fillEdges(separatePlatforms());
         System.out.println("Remaining demand not yet answered : " + leftdemand);
+        leftdemand = maxFlow(leftdemand);
+        if (leftdemand > 0) {
+        	System.out.println("Cannot meet demand : unanswered demand : " + leftdemand);
+        	return -1;
+        }
         System.out.println("Total cost : " + getTotalCost());
-        //System.out.print(graph);
 		//TODO init solution ....
 		initTime = System.currentTimeMillis() - start - readingTime;
-		System.out.println("(init time = " + initTime + ")-------------------------------------------");
+		System.out.println("(init time = " + initTime + ")--------------------------------------------------------");
 		
 		//find a better solution as long as there is time left
-		System.out.println("IMPROVING SOLUTION------------------------------------------");
+		System.out.println("IMPROVING SOLUTION---------------------------------------------------------");
 
 
             //TODO improving the solution ...
@@ -75,7 +79,11 @@ public class Solver {
         System.out.println(getTotalCost());
 
         improvementTime = System.currentTimeMillis() - start - initTime - readingTime;
-		System.out.println("(improvement time = " + improvementTime + ")------------------------------------");
+		System.out.println("(improvement time = " + improvementTime + ")-----------------------------------------------");
+		System.out.println("BEST SOLUTION------------------------------------------------------");
+		double total = getTotalCost();
+		System.out.println(total);
+		return total;
 	}
 	
 	public void saveSolution(String saveFile) {
@@ -157,26 +165,22 @@ public class Solver {
             LinkedList<Integer> left = new LinkedList<>();
             LinkedList<Integer> right = new LinkedList<>();
             for (int s : graph.getInEdges(n)) {
-				if(graph.containsEdge(s, n)) {
-					int v = graph.nextValidKey();
-					leftPlatforms.add(v);
-					graph.setNode(v, new Node(0, 0, 0)); // add a left platform
-					graph.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
-					left.add(v);
-	            	platformMap.put(v, n);
-				}
+				int v = graph.nextValidKey();
+				leftPlatforms.add(v);
+				graph.setNode(v, new Node(0, 0, 0)); // add a left platform
+				graph.setEdge(s, v, new Edge(graph.getEdge(s, n))); // add an edge
+				left.add(v);
+            	platformMap.put(v, n);	
             }
             for(int c : graph.getOutEdges(n)) {
-                if(graph.containsEdge(n, c)) {
-                    int v = graph.nextValidKey();
-                    rightPlatforms.add(v);
-                    graph.setNode(v, new Node(0, 0, 0)); // add a right platform
-                    graph.setEdge(v, c, new Edge(graph.getEdge(n, c)));
-                    test0 = v;
-                    test1 = c;
-                    right.add(v);
-                	platformMap.put(v, n);
-                }
+                int v = graph.nextValidKey();
+                rightPlatforms.add(v);
+                graph.setNode(v, new Node(0, 0, 0)); // add a right platform
+                graph.setEdge(v, c, new Edge(graph.getEdge(n, c)));
+                test0 = v;
+                test1 = c;
+                right.add(v);
+            	platformMap.put(v, n);
             }
             for(int l : left) {
                 for(int r : right) {
@@ -203,15 +207,112 @@ public class Solver {
         return newEdges;
 	}
 
+	private int maxFlow(int demand) {
+		System.out.println("FINDING AMELIORATING PATH :");
+		if (demand != 0) {
+			//init graph for max flow
+			int source = graph.nextValidKey();
+			graph.setNode(source, new Node(0, 0, 0));
+			int sink = graph.nextValidKey();
+			graph.setNode(sink, new Node(0, 0, 0));
+			for (int sup : suppliers) {
+				int dem = graph.getNode(sup).getDemand();
+		        int out = 0;
+		        for (int i : graph.getOutEdges(sup)) {
+		        	out += graph.getEdge(sup, i).getNbrProduct();
+		        }
+				graph.setEdge(source, sup, new Edge(-dem, 0, 0, 0));
+				graph.getEdge(source, sup).setNbrProduct(out);
+			}
+			for (int cli : clients) {
+				int dem = graph.getNode(cli).getDemand();
+				int in = 0;
+		        for (int i : graph.getInEdges(cli)) {
+		        	in += graph.getEdge(i, cli).getNbrProduct();
+		        }
+				graph.setEdge(cli, sink, new Edge(dem, 0, 0, 0));
+				graph.getEdge(cli, sink).setNbrProduct(in);
+			}
+			
+			//find an ameliorating path
+			LinkedList<Integer> path = new LinkedList<>();
+			LinkedList<Integer> visited = new LinkedList<>();
+			Graph<Node, Edge> resGraph = getResidualGraph();
+			do {
+				path = new LinkedList<>();
+				path = flowDFS(source, sink, visited, resGraph, path);
+				if (!path.isEmpty()) { //modifying graph and residual graph
+					int flow = getMaxCapacity(path, resGraph);
+					System.out.println("Amelioration path for " + flow +" product(s) : " +path);
+					for (int i = 0; i < path.size()-1; i++) {
+						int a = path.get(i);
+						int b = path.get(i+1);
+						//set graph
+						if (graph.containsEdge(a, b)) {
+							graph.getEdge(a,b).setNbrProduct(graph.getEdge(a, b).getNbrProduct() + flow);
+						} else {
+							graph.getEdge(b,a).setNbrProduct(graph.getEdge(b, a).getNbrProduct() - flow);
+						}
+						//set residual graph
+						if (resGraph.getEdge(a, b).getCapacity() - flow == 0)
+							resGraph.removeEdge(a, b);
+						else
+							resGraph.getEdge(a,b).setCapacity(resGraph.getEdge(a, b).getCapacity() - flow);
+						if (resGraph.containsEdge(b, a))
+							resGraph.getEdge(b,a).setCapacity(resGraph.getEdge(b, a).getCapacity() + flow);
+						else
+							resGraph.setEdge(b, a, new Edge(flow, 0, 0, 0));
+					}
+					demand -= flow;
+				}
+			} while (!path.isEmpty() && demand != 0);
+			
+			//reverse graph to normal
+			graph.removeNode(source);
+			graph.removeNode(sink);
+		}
+		return demand;
+	}
+	
+	private LinkedList<Integer> flowDFS(int node, int sink, LinkedList<Integer> visited,
+					Graph<Node, Edge> resGraph, LinkedList<Integer> path) {
+		if (visited.contains(node))
+			return path;
+		else if (node == sink){
+			path.add(node);
+			return path;
+		} else {
+			for (int next : resGraph.getOutEdges(node)) {
+				LinkedList<Integer> tmpVisited = new LinkedList<>(visited);
+				LinkedList<Integer> tmpPath = new LinkedList<>(path);
+				tmpVisited.add(node);
+				tmpPath.add(node);
+				tmpPath = flowDFS(next, sink, tmpVisited, resGraph, tmpPath);
+				if (tmpPath.getLast() == sink) {
+					path = tmpPath;
+					break;
+				}
+			}
+			return path;
+		}
+	}
+	
     private int getPathCapacity(int a, int b, int c, int d) { //return the maximum capacity of the path
         int max = 0;
+        int out = 0;
+        for (int i : graph.getOutEdges(a)) {
+        	out += graph.getEdge(a, i).getNbrProduct();
+        }
+        int in = 0;
+        for (int i : graph.getInEdges(d)) {
+        	in += graph.getEdge(i, d).getNbrProduct();
+        }
         
         max = Math.min(graph.getEdge(a, b).getAvailableFlow(),
         			graph.getEdge(b, c).getAvailableFlow());
         max = Math.min(max, graph.getEdge(c, d).getAvailableFlow());
-        max = Math.min(max, -graph.getNode(a).getDemand());
-        max = Math.min(max, graph.getNode(d).getDemand());
-        
+        max = Math.min(max, -out - graph.getNode(a).getDemand());
+        max = Math.min(max, graph.getNode(d).getDemand() - in);
         return max;
     }
 
@@ -250,7 +351,7 @@ public class Solver {
     }
     
     private int fillEdges(LinkedList<ArrayList<Integer>> platformEdges) { //initial solution for Ford-Fulkerson
-    	System.out.println("FILLING GRAPH FLOW :");
+    	System.out.println("FILLING EDGES :");
     	int totalDemand = 0;
     	
     	for (Integer i : clients) {
@@ -258,19 +359,20 @@ public class Solver {
 		}
     	
     	System.out.println("total demand before filling : " + totalDemand);
-    	System.out.println("filling ...");
     	for (ArrayList<Integer> p : platformEdges) {
-			int s = graph.getInEdges(p.get(0)).getFirst();
-			int c = graph.getOutEdges(p.get(1)).getFirst();
-			int maxFlow = getPathCapacity(s, p.get(0), p.get(1), c);
-			if (maxFlow != 0) {
-				totalDemand -= maxFlow;
-				graph.getEdge(s, p.get(0)).setNbrProduct(graph.getEdge(s, p.get(0)).getNbrProduct() + maxFlow);
-				graph.getEdge(p.get(0), p.get(1)).setNbrProduct(graph.getEdge(p.get(0), p.get(1)).getNbrProduct() + maxFlow);
-				graph.getEdge(p.get(1), c).setNbrProduct(graph.getEdge(p.get(1), c).getNbrProduct() + maxFlow);
-				graph.getNode(s).setDemand(graph.getNode(s).getDemand() + maxFlow);
-				graph.getNode(c).setDemand(graph.getNode(c).getDemand() - maxFlow);
-			}
+    		if (totalDemand != 0) {
+				int s = graph.getInEdges(p.get(0)).getFirst();
+				int c = graph.getOutEdges(p.get(1)).getFirst();
+				int maxFlow = getPathCapacity(s, p.get(0), p.get(1), c);
+				if (maxFlow != 0) {
+					System.out.println("filling " + p.get(0) + "->" + p.get(1) + " with " + maxFlow + " product(s)");
+					totalDemand -= maxFlow;
+					graph.getEdge(s, p.get(0)).setNbrProduct(graph.getEdge(s, p.get(0)).getNbrProduct() + maxFlow);
+					graph.getEdge(p.get(0), p.get(1)).setNbrProduct(graph.getEdge(p.get(0), p.get(1)).getNbrProduct() + maxFlow);
+					graph.getEdge(p.get(1), c).setNbrProduct(graph.getEdge(p.get(1), c).getNbrProduct() + maxFlow);
+				}
+    		} else
+    			break;
 		}
     	
     	return totalDemand;    	
