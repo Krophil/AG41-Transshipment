@@ -68,11 +68,11 @@ public class Solver {
 		//find a better solution as long as there is time left
 		System.out.println("IMPROVING SOLUTION------------------------------------------");
 
+        coutmin(graph);
 
-        while (System.currentTimeMillis() - start < computationTime) {
+        /*while (System.currentTimeMillis() - start < computationTime) {
             //TODO improving the solution ...
-            coutmin(graph);
-        }
+        }*/
         System.out.println(getTotalCost());
 
         improvementTime = System.currentTimeMillis() - start - initTime - readingTime;
@@ -216,10 +216,10 @@ public class Solver {
         return max;
     }
 
-    private int getMaxCapacity(LinkedList<Integer> c) {
+    private int getMaxCapacity(LinkedList<Integer> c, Graph<Node, Edge> g) {
         int max = Integer.MAX_VALUE;
         for(int i = 1 ; i<c.size() ; i++) {
-            max = Math.min(c.get(i-1),c.get(i));
+            max = Math.min(max, g.getEdge(c.get(i-1),c.get(i)).getCapacity());
         }
         return max;
     }
@@ -309,7 +309,7 @@ public class Solver {
     private void GraphCycles(Graph<Node,Edge> g) {
         LinkedList<Integer> visited = new LinkedList<>();
         LinkedList<Integer> candidates = new LinkedList<>();
-        for(int v : graph.getNodeKeys()){
+        for(int v : g.getNodeKeys()){
             if(!visited.contains(v) && !candidates.contains(v))
                 dfs(g, v, visited, candidates);
         }
@@ -382,38 +382,45 @@ public class Solver {
 //        for(int n : clients)
 //            graph.setEdge(n, t, new Edge(graph.getNode(n).getDemand(), 0, 0, 0));
         //System.out.println(graph);
-        Graph<Node,Edge> resid = getResidualGraph();
+        Graph<Node,Edge> resid;
 		//System.out.println(resid);
 
         //Search of negative cycles
-        GraphCycles(resid);
+        //GraphCycles(resid);
 
         int maxCap;
         double cost = 0;
         boolean negativeCost = true;
         while (negativeCost) {
+            resid = getResidualGraph();
+            cycles.clear();
+            GraphCycles(resid);
             negativeCost = false;
+            //System.out.println(resid);
+            //System.out.println(cycles);
             for (LinkedList<Integer> c : cycles) {
                 //System.out.println(c);
                 if (c.size() > 3) {
-                    maxCap = getMaxCapacity(c);
+                    maxCap = getMaxCapacity(c, resid);
                     //System.out.println(maxCap);
                     cost = 0;
-                    for (int i = 1; i < c.size(); i++) {
-                        //System.out.println(c.get(i-1)+" "+c.get(i));
-                        cost += resid.getEdge(c.get(i - 1), c.get(i)).getCost() * maxCap; //add cost linked to products
-                        //System.out.println(maxCap);
+					for (int i = 1; i < c.size(); i++) {
+                        //System.out.println(c.get(i));
+
+                        cost += resid.getEdge(c.get(i - 1), c.get(i)).getUnitCost() * maxCap; //add cost linked to products
+                        //System.out.println("fixedcost of " + c.get(i-1) + "-" + c.get(i) + " : " + resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost() );
 
                         if (resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost() > 0) { //check if it is an add or a remove on the edge
                             if (graph.getEdge(c.get(i - 1), c.get(i)).getNbrProduct() == 0) //don't forget fixed cost to add if edge unused
                                 cost += resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost();
                         } else {
                             if (resid.getEdge(c.get(i - 1), c.get(i)).getCapacity() == maxCap)
-                                cost -= resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost(); //remove fixed cost if we empty the edge
+                                cost += resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost(); //remove fixed cost if we empty the edge
                         }
                     }
-                    //System.out.println(cost);
+
                     if (cost < 0) {
+                        System.out.println("NEGATIVE COST : " + cost);
                         negativeCost = true;
                         for(int i = 1 ; i<c.size() ; i++) {
                             if(graph.containsEdge(c.get(i-1),c.get(i))) { //is it a residual edge or an edge from the usual graph
@@ -422,11 +429,13 @@ public class Solver {
                                 //System.out.println("after"+graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct());
 
                             } else { //if it is a residual edge
-                                resid.getEdge(c.get(i-1), c.get(i)).setNbrProduct(resid.getEdge(c.get(i-1), c.get(i)).getNbrProduct()-maxCap);
+                                graph.getEdge(c.get(i), c.get(i-1)).setNbrProduct(graph.getEdge(c.get(i), c.get(i-1)).getNbrProduct()-maxCap);
                             }
                         }
 						System.out.println(getTotalCost());
+                        break;
                     }
+                    System.out.println("COST = " + cost);
                 }
             }
         }
