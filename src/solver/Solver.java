@@ -5,8 +5,14 @@ import graph.Graph;
 import graph.Node;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 
@@ -16,6 +22,7 @@ public class Solver {
 	private long computationTime, initTime, improvementTime, readingTime;
 	private LinkedList<Integer> oldPlatforms, leftPlatforms, rightPlatforms, suppliers, clients;
 	private HashMap<Integer, Integer> platformMap;
+	private double bestCost;
     private LinkedList<LinkedList<Integer>> cycles = new LinkedList<>();
 	
 	public Solver() {
@@ -31,6 +38,7 @@ public class Solver {
 		clients = new LinkedList<>();
 		oldPlatforms = new LinkedList<>();
 		platformMap = new HashMap<>();
+		bestCost = -1;
 	}
 
 	public double solve(String problemFile, long computationTime) {
@@ -47,8 +55,15 @@ public class Solver {
 
 		//reading input file and building the corresponding graph
 		System.out.println("READING FILE----------------------------------------------------------------");
-		if (loadProblemFile(problemFile) != 0) {
-			System.out.println("Total demand is not null, the problem is not feasable.");
+		int k = loadProblemFile(problemFile);
+		if (k == -2) {
+			System.out.println("File structure problem");
+			return -1;
+		} else if (k == -1) {
+			System.out.println("File reading problem");
+			return -1;
+		} else if (k != 0) {
+			System.out.println("Total demand is not null");
 			return -1;
 		}
 		//System.out.print(graph);
@@ -83,11 +98,88 @@ public class Solver {
 		System.out.println("BEST SOLUTION------------------------------------------------------");
 		double total = getTotalCost();
 		System.out.println(total);
+		bestCost = total;
 		return total;
 	}
 	
+	private void mergePlatforms() {
+		for (int i : oldPlatforms) {
+			graph.setNode(i, new Node(0, 0, 0));
+			for (int sup : suppliers) {
+				graph.setEdge(sup, i, 
+						new Edge(-graph.getNode(sup).getDemand(), 0, 0, 0));
+			}
+			for (int cli : clients) {
+				graph.setEdge(i, cli, 
+						new Edge(graph.getNode(cli).getDemand(), 0, 0, 0));
+			}
+		}
+
+		for(int i = 0; i < leftPlatforms.size(); i++) {
+			int plt = graph.getInEdges(leftPlatforms.get(i)).getFirst();
+			int flow = graph.getEdge(plt, leftPlatforms.get(i)).getNbrProduct();
+			int newPlt = platformMap.get(leftPlatforms.get(i));
+			graph.getEdge(plt, newPlt).setNbrProduct(
+					graph.getEdge(plt, newPlt).getNbrProduct() + flow);
+			graph.removeNode(leftPlatforms.get(i));
+		}
+		for(int i = 0; i < rightPlatforms.size(); i++) {
+			int cli = graph.getOutEdges(rightPlatforms.get(i)).getFirst();
+			int flow = graph.getEdge(rightPlatforms.get(i), cli).getNbrProduct();
+			int newPlt = platformMap.get(rightPlatforms.get(i));
+			graph.getEdge(newPlt, cli).setNbrProduct(
+					graph.getEdge(newPlt, cli).getNbrProduct() + flow);
+			graph.removeNode(rightPlatforms.get(i));
+		}
+	}
+	
 	public void saveSolution(String saveFile) {
-		//TODO
+		System.out.println("SAVING SOLUTION-----------------------------------------");
+		mergePlatforms();
+		System.out.println(graph);
+		BufferedWriter bw = null;
+		try {
+			
+			File file = new File(saveFile);
+			if (!file.exists()) {
+				System.out.println("Creating file " + saveFile);
+				file.createNewFile();
+			} else
+				System.out.println("File already exists\nWriting to " + saveFile);
+			FileWriter fw = new FileWriter(saveFile);
+			bw = new BufferedWriter(fw);
+			
+
+			bw.write("TOTAL COST : " + bestCost +"\n");
+			
+			bw.write("NODES :\n");
+			
+			for(int i : graph.getNodeKeys()) {
+				bw.write(i + " : demand = " + graph.getNode(i).getDemand() + "\n");
+			}
+			
+
+			bw.write("EDGES :\n");
+			for(int i : graph.getNodeKeys()) {
+				for(int j : graph.getNodeKeys()) {
+					Edge e = graph.getEdge(i, j);
+					if (e != null)
+						bw.write(i + "->" + j+" : " + graph.getEdge(i, j).getNbrProduct() +
+								"/" + graph.getEdge(i, j).getCapacity() + "\n");
+				}
+			}
+		} catch (FileAlreadyExistsException x) {
+			x.printStackTrace();
+		} catch (IOException x) {
+			x.printStackTrace();
+		} finally {
+			try {
+				if (bw != null) 
+					bw.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 	
 	private int loadProblemFile(String file) {
@@ -108,6 +200,7 @@ public class Solver {
 			for (int i = 0; i < 5; i++) { //comments
 				br.readLine();
 			}
+			System.out.println("Loading nodes");
 			for (int i = 0; i < nbrNodes; i++) { //nodes
 				currLine = br.readLine();
 				String[] parse = currLine.split(" ");
@@ -126,6 +219,7 @@ public class Solver {
 			for (int i = 0; i < 7; i++) { //comments
 				br.readLine();
 			}
+			System.out.println("Loading edges");
 			for (int i = 0; i < nbrEdges; i++) { //edges
 				currLine = br.readLine();
 				String[] parse = currLine.split(" ");
@@ -136,21 +230,21 @@ public class Solver {
 				}
 			}
 		} catch (IndexOutOfBoundsException e) {
-			System.out.println("Problem file structure is not respected.");
 			e.printStackTrace();
+			return -2;
 		} catch (NullPointerException e) { 
-			System.out.println("Problem file structure is not respected.");
 			e.printStackTrace();
+			return -2;
 		} catch (IOException e) {
 			e.printStackTrace();
+			return -1;
 		} finally {
 			try {
 				if (br != null) 
 					br.close();
-				else
-					System.out.println("Problem file does not exist.");
 			} catch (IOException ex) {
 				ex.printStackTrace();
+				return -1;
 			}
 		}
 		return totalDemand;
@@ -236,11 +330,9 @@ public class Solver {
 			
 			//find an ameliorating path
 			LinkedList<Integer> path = new LinkedList<>();
-			LinkedList<Integer> visited = new LinkedList<>();
 			Graph<Node, Edge> resGraph = getResidualGraph();
 			do {
-				path = new LinkedList<>();
-				path = flowDFS(source, sink, visited, resGraph, path);
+				path = flowDFS(source, sink, resGraph);
 				if (!path.isEmpty()) { //modifying graph and residual graph
 					int flow = getMaxCapacity(path, resGraph);
 					System.out.println("Amelioration path for " + flow +" product(s) : " +path);
@@ -274,27 +366,32 @@ public class Solver {
 		return demand;
 	}
 	
-	private LinkedList<Integer> flowDFS(int node, int sink, LinkedList<Integer> visited,
-					Graph<Node, Edge> resGraph, LinkedList<Integer> path) {
-		if (visited.contains(node))
-			return path;
-		else if (node == sink){
-			path.add(node);
-			return path;
-		} else {
-			for (int next : resGraph.getOutEdges(node)) {
-				LinkedList<Integer> tmpVisited = new LinkedList<>(visited);
+	public LinkedList<Integer> flowDFS(int source, int sink,
+			Graph<Node, Edge> resGraph) {
+		LinkedList<Integer> bestPath = new LinkedList<>();
+			
+		//init dfs
+		Stack<LinkedList<Integer>> stack = new Stack<>();
+		LinkedList<Integer> sourceList = new LinkedList<>();
+		sourceList.add(source);
+		stack.push(sourceList);
+		
+		//loop
+		while (!stack.isEmpty()) {
+			LinkedList<Integer> path = stack.pop();
+			for (int next : resGraph.getOutEdges(path.getLast())) {
 				LinkedList<Integer> tmpPath = new LinkedList<>(path);
-				tmpVisited.add(node);
-				tmpPath.add(node);
-				tmpPath = flowDFS(next, sink, tmpVisited, resGraph, tmpPath);
-				if (tmpPath.getLast() == sink) {
-					path = tmpPath;
-					break;
+				tmpPath.add(next);
+				if (!path.contains(next)) {
+					stack.push(tmpPath);
+				}
+				if (next == sink && (bestPath.isEmpty() ||
+							getMaxCapacity(bestPath, resGraph) < getMaxCapacity(tmpPath, resGraph))) {
+					bestPath = tmpPath;
 				}
 			}
-			return path;
 		}
+		return bestPath;
 	}
 	
     private int getPathCapacity(int a, int b, int c, int d) { //return the maximum capacity of the path
