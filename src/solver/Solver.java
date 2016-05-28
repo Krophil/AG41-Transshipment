@@ -68,11 +68,10 @@ public class Solver {
 		//find a better solution as long as there is time left
 		System.out.println("IMPROVING SOLUTION------------------------------------------");
 
-        coutmin(graph);
 
-        /*while (System.currentTimeMillis() - start < computationTime) {
             //TODO improving the solution ...
-        }*/
+            coutmin(computationTime-readingTime-initTime);
+
         System.out.println(getTotalCost());
 
         improvementTime = System.currentTimeMillis() - start - initTime - readingTime;
@@ -370,7 +369,7 @@ public class Solver {
         return cp;
     }
 
-    private void coutmin(Graph<Node, Edge> g) {
+    private void coutmin(long remTime) {
 //        int s = 0;
 //        int t = graph.nextValidKey();
 //
@@ -391,7 +390,8 @@ public class Solver {
         int maxCap;
         double cost = 0;
         boolean negativeCost = true;
-        while (negativeCost) {
+        long start = System.currentTimeMillis();
+        while (negativeCost && (System.currentTimeMillis() - start < remTime)) {
             resid = getResidualGraph();
             cycles.clear();
             GraphCycles(resid);
@@ -420,7 +420,7 @@ public class Solver {
                     }
 
                     if (cost < 0) {
-                        System.out.println("NEGATIVE COST : " + cost);
+                        //System.out.println("NEGATIVE COST : " + cost);
                         negativeCost = true;
                         for(int i = 1 ; i<c.size() ; i++) {
                             if(graph.containsEdge(c.get(i-1),c.get(i))) { //is it a residual edge or an edge from the usual graph
@@ -435,7 +435,7 @@ public class Solver {
 						System.out.println(getTotalCost());
                         break;
                     }
-                    System.out.println("COST = " + cost);
+                    //System.out.println("COST = " + cost);
                 }
             }
         }
