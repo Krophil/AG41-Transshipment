@@ -1,1 +1,8 @@
 /out/
+*.aux
+*.bbl
+*.blg
+*.lof
+*.log
+*.tex.backup
+*.toc
