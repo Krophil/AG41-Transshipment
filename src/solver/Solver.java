@@ -91,10 +91,9 @@ public class Solver {
             //TODO improving the solution ...
             coutmin(computationTime-readingTime-initTime);
 
-        System.out.println(getTotalCost());
 
         improvementTime = System.currentTimeMillis() - start - initTime - readingTime;
-		System.out.println("(improvement time = " + improvementTime + ")-----------------------------------------------");
+		System.out.println("(improvement time = " + improvementTime / 60 + ")-----------------------------------------------");
 		System.out.println("BEST SOLUTION------------------------------------------------------");
 		double total = getTotalCost();
 		System.out.println(total);
@@ -136,7 +135,6 @@ public class Solver {
 	public void saveSolution(String saveFile) {
 		System.out.println("SAVING SOLUTION-----------------------------------------");
 		mergePlatforms();
-		System.out.println(graph);
 		BufferedWriter bw = null;
 		try {
 			
@@ -223,7 +221,7 @@ public class Solver {
 			for (int i = 0; i < nbrEdges; i++) { //edges
 				currLine = br.readLine();
 				String[] parse = currLine.split(" ");
-				if (Integer.valueOf(parse[4]) > 0) { //checking positivity of the edge capacity
+                if (Integer.valueOf(parse[4]) > 0) { //checking positivity of the edge capacity
 					graph.setEdge(Integer.valueOf(parse[2]), Integer.valueOf(parse[3]),
 								new Edge(Integer.valueOf(parse[4]), Double.valueOf(parse[5]),
 										Double.valueOf(parse[6]), Double.valueOf(parse[7])));
@@ -251,10 +249,9 @@ public class Solver {
 	}
 
 	private LinkedList<ArrayList<Integer>> separatePlatforms() {
-		System.out.println("SEPARATING PLATFORMS :");
+		System.out.println("Separating platforms");
 		LinkedList<ArrayList<Integer>> newEdges = new LinkedList<>();
-		int test0 = 0, test1 = 0;
-		
+
         for (int n : oldPlatforms) {
             LinkedList<Integer> left = new LinkedList<>();
             LinkedList<Integer> right = new LinkedList<>();
@@ -271,8 +268,6 @@ public class Solver {
                 rightPlatforms.add(v);
                 graph.setNode(v, new Node(0, 0, 0)); // add a right platform
                 graph.setEdge(v, c, new Edge(graph.getEdge(n, c)));
-                test0 = v;
-                test1 = c;
                 right.add(v);
             	platformMap.put(v, n);
             }
@@ -295,7 +290,7 @@ public class Solver {
                 }
             }
             graph.removeNode(n);
-            System.out.println(n + " is now " + left + right);
+            // System.out.println(n + " is now " + left + right);
         }
         
         return newEdges;
@@ -448,7 +443,7 @@ public class Solver {
     }
     
     private int fillEdges(LinkedList<ArrayList<Integer>> platformEdges) { //initial solution for Ford-Fulkerson
-    	System.out.println("FILLING EDGES :");
+    	System.out.println("Filling edges :");
     	int totalDemand = 0;
     	
     	for (Integer i : clients) {
@@ -462,7 +457,7 @@ public class Solver {
 				int c = graph.getOutEdges(p.get(1)).getFirst();
 				int maxFlow = getPathCapacity(s, p.get(0), p.get(1), c);
 				if (maxFlow != 0) {
-					System.out.println("filling " + p.get(0) + "->" + p.get(1) + " with " + maxFlow + " product(s)");
+					//System.out.println("filling " + p.get(0) + "->" + p.get(1) + " with " + maxFlow + " product(s)");
 					totalDemand -= maxFlow;
 					graph.getEdge(s, p.get(0)).setNbrProduct(graph.getEdge(s, p.get(0)).getNbrProduct() + maxFlow);
 					graph.getEdge(p.get(0), p.get(1)).setNbrProduct(graph.getEdge(p.get(0), p.get(1)).getNbrProduct() + maxFlow);
@@ -564,28 +559,11 @@ public class Solver {
         do {
             cp.addFirst(c.pop());
         } while (!c.isEmpty());
-        //System.out.println(cp);
         return cp;
     }
 
     private void coutmin(long remTime) {
-//        int s = 0;
-//        int t = graph.nextValidKey();
-//
-//        graph.setNode(s, new Node(0,0,0)); //source
-//        graph.setNode(t, new Node(0,0,0)); //target
-//        for(int n : suppliers)
-//            graph.setEdge(s, n, new Edge(-(graph.getNode(n).getDemand()), 0, 0, 0));
-//
-//        for(int n : clients)
-//            graph.setEdge(n, t, new Edge(graph.getNode(n).getDemand(), 0, 0, 0));
-        //System.out.println(graph);
         Graph<Node,Edge> resid;
-		//System.out.println(resid);
-
-        //Search of negative cycles
-        //GraphCycles(resid);
-
         int maxCap;
         double cost = 0;
         boolean negativeCost = true;
@@ -595,19 +573,13 @@ public class Solver {
             cycles.clear();
             GraphCycles(resid);
             negativeCost = false;
-            //System.out.println(resid);
-            //System.out.println(cycles);
             for (LinkedList<Integer> c : cycles) {
-                //System.out.println(c);
                 if (c.size() > 3) {
                     maxCap = getMaxCapacity(c, resid);
-                    //System.out.println(maxCap);
                     cost = 0;
 					for (int i = 1; i < c.size(); i++) {
-                        //System.out.println(c.get(i));
 
                         cost += resid.getEdge(c.get(i - 1), c.get(i)).getUnitCost() * maxCap; //add cost linked to products
-                        //System.out.println("fixedcost of " + c.get(i-1) + "-" + c.get(i) + " : " + resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost() );
 
                         if (resid.getEdge(c.get(i - 1), c.get(i)).getFixedCost() > 0) { //check if it is an add or a remove on the edge
                             if (graph.getEdge(c.get(i - 1), c.get(i)).getNbrProduct() == 0) //don't forget fixed cost to add if edge unused
@@ -619,22 +591,18 @@ public class Solver {
                     }
 
                     if (cost < 0) {
-                        //System.out.println("NEGATIVE COST : " + cost);
                         negativeCost = true;
                         for(int i = 1 ; i<c.size() ; i++) {
                             if(graph.containsEdge(c.get(i-1),c.get(i))) { //is it a residual edge or an edge from the usual graph
-                                //System.out.println("before"+graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct());
                                 graph.getEdge(c.get(i-1), c.get(i)).setNbrProduct(graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct()+maxCap);
-                                //System.out.println("after"+graph.getEdge(c.get(i-1), c.get(i)).getNbrProduct());
 
                             } else { //if it is a residual edge
                                 graph.getEdge(c.get(i), c.get(i-1)).setNbrProduct(graph.getEdge(c.get(i), c.get(i-1)).getNbrProduct()-maxCap);
                             }
                         }
-						System.out.println(getTotalCost());
+						System.out.println("Better solution found : " + getTotalCost());
                         break;
                     }
-                    //System.out.println("COST = " + cost);
                 }
             }
         }

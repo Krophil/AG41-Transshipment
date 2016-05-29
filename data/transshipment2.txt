@@ -1,7 +1,7 @@
 NAME : transshipment2
-NBR_NODES: 10 
-NBR_EDGES: 21 
-T: 1000
+NBR_NODES : 10 
+NBR_EDGES : 21 
+T : 1000
 # NODE: i x_i y_i b_i g_i s_i
 # x_i, y_i : x, y of node i
 # b_i : demand of node_i, <0 for depot, >0 for client, =0 for platforms
