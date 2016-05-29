@@ -24,6 +24,7 @@ public class Solver {
 	private HashMap<Integer, Integer> platformMap;
 	private double bestCost;
     private LinkedList<LinkedList<Integer>> cycles = new LinkedList<>();
+    private long start = 0;
 	
 	public Solver() {
 		maxTime = -1;
@@ -51,7 +52,7 @@ public class Solver {
 		this.computationTime = computationTime;
 		
 		//starting time counter
-		long start = System.currentTimeMillis();
+		start = System.currentTimeMillis();
 
 		//reading input file and building the corresponding graph
 		System.out.println("READING FILE----------------------------------------------------------------");
@@ -147,7 +148,7 @@ public class Solver {
 			FileWriter fw = new FileWriter(saveFile);
 			bw = new BufferedWriter(fw);
 			
-
+            bw.write("TOTAL TIME : " + Double.toString(((double) System.currentTimeMillis() - (double) start)/1000.0) + "s\n");
 			bw.write("TOTAL COST : " + bestCost +"\n");
 			
 			bw.write("NODES :\n");
@@ -569,6 +570,7 @@ public class Solver {
         boolean negativeCost = true;
         long start = System.currentTimeMillis();
         while (negativeCost && (System.currentTimeMillis() - start < remTime)) {
+            System.out.println("Current time : " + ((Double.toString((((double) System.currentTimeMillis() - (double) start)) / 1000.0))) + "s");
             resid = getResidualGraph();
             cycles.clear();
             GraphCycles(resid);
