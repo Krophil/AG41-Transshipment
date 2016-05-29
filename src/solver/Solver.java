@@ -82,7 +82,6 @@ public class Solver {
         	return -1;
         }
         System.out.println("Total cost : " + getTotalCost());
-		//TODO init solution ....
 		initTime = System.currentTimeMillis() - start - readingTime;
 		System.out.println("(init time = " + initTime + ")--------------------------------------------------------");
 		
@@ -90,7 +89,6 @@ public class Solver {
 		System.out.println("IMPROVING SOLUTION---------------------------------------------------------");
 
 
-            //TODO improving the solution ...
             coutmin(computationTime-readingTime-initTime);
 
 

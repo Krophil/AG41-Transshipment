@@ -312,39 +312,47 @@ La complexité de ce programme est égale à la somme des complexités des diff�
 
 \section{Implémentation}
 
-Pour pouvoir impl\'ementer notre algorithme, nous nous avons d\'ecid\'e de cr\'eer notre propre structure de donn\'ees afin de simplifier les diff\'erentes m\'ethodes dont nous avions besoin. La s\'eparation des plateformes a ainsi \'et\'e directement prise en compte dans la structure et a permis de m\'emoriser les diff\'erents noeuds utiles \`a la bonne marche de l'algorithme.
+Pour pouvoir impl\'ementer notre algorithme, nous avons d\'ecid\'e de cr\'eer notre propre structure de graphe afin qu'elle s'adapte aux diff\'erentes m\'ethodes que nous avons utilisées. La s\'eparation des plateformes a ainsi \'et\'e directement prise en compte dans la structure.
 
-L'algorithme est cod\'e en Java, nous avons utilis\'e les HashMaps et les LinkedLists.
+Le programme est cod\'e en Java.
 
-\subsection{La cr\'eation d'une structure de donn\'ees}
+\subsection{La classe Graph}
 
-\subsubsection{Le Graphe : une classe g\'en\'erique}
+\subsubsection{Graph : une classe g\'en\'erique}
 
-La classe Graph est une classe g\'en\'erique, cela permet de faire un graphe dynamique qui pourra \^etre utilis\'e pour diff\'erents type d'arcs et de noeuds. Cette classe ne contient aucune donn\'ee. Elle permet simplement de stocker les identifiants dans des HashMaps. Ensuite, ce sont les classes Nodes et Edges qui prennent le relais.
+La classe Graph est une classe g\'en\'erique, ce qui permet une certaine flexibilité quant aux données portées par les noeuds et les arcs. Elle permet de stocker la structure du graphe indépendament des données. Le Graph fonctionne avec des numéros uniques identifiant les noeuds. Les arcs sont également identifiés en utilisant un couple d'identifiants.
 
-\subsubsection{Les Nodes et les Edges}
+Dans notre solver, nous n'avons utilisé que les classes Node et Edge en paramètre de classe de Graph, mais on pourait tout à fait utiliser d'autres couples <node type, edge type> pour améliorer les algorithmes.
 
-Les Nodes gardent le minimum d'informations possibles. Elles se composent de plusieurs attributs tels que la demande, le co\^ut et le temps de transbordement pour les plateformes.
+\subsubsection{Les classes Node et les Edge}
 
-De plus, l'attribut parent est utilis\'e dans le DFS permettant de g\'en\'erer tous les cycles d'un graphes. Il est utilis\'e pour remonter jusqu'au parent cr\'eant le cycle.
+Les classes Node et Edge sont composées des données du problème en terme d'informations portées par les noeuds et les arcs.
+
+La classe Node se compose donc de ces données de base, mais aussi d'un attribut parent qui est utilis\'e dans le DFS permettant de g\'en\'erer tous les cycles du graphes. Il est utilis\'e pour remonter jusqu'au parent cr\'eant le cycle.
+
+\subsection{La lecture du fichier de problème}
+
+La lecture du fichier de problème est la 1er étape de l'algorithme. Elle permet de construire le graphe de base du problème. Elle permet aussi d'éliminer les arcs dont la capacité est nulle et de déterminer les 3 ensembles de noeuds que sont les fournisseurs, les plateformes et les clients. C'est également à cette étape qu'est détecté si le nombre de produits offerts par les founisseurs correspond au nombre de produits demandé par les clients.
 
 \subsection{La s\'eparation des plateformes}
 
-La s\'eparation des plateformes permet de prendre en compte la contrainte de temps. Pour la mettre en place en Java, on r\'ecup\`ere tous les noeuds dont la demande est \'egale \`a 0. On trouve le prochain identifiant que l'on donne comme cl\'e au noeud. 
-Enfin, avec plusieurs boucles, il suffit de g\'en\'erer tous les arcs li\'es aux noeuds plateformes. La r\'epartition des donn\'ees est indiqu\'ee dans la premi\`ere partie de ce compte-rendu.
+La s\'eparation des plateformes permet de prendre en compte la contrainte de temps. Pour la mettre en place en Java, on utilise la liste de noeuds plateformes crée à la lecture du fichier de problème.
 
-De plus, dans cette partie, nous avons supprim\'e tous les chemins dont la capacité \'etait \'egale \`a 0 afin de faciliter l'ex\'ecution.
+Pour chaque plateforme, on crée de nouveaux noeuds comme nous l'avions prévu dans la phase d'analyse du problème de transbordement. Les noeuds initiaux sont supprimés à l'issu de cette étape, et 2 listes sont crées : la liste des plateformes gauches (liées aux fournisseurs) et la liste des plateformes droites (liées aux clients).
 
-Enfin, pour m\'emoriser ces plateformes et pouvoir les refusionner \`a la fin de l'am\'elioration de la solution, on les ajoute \`a une HashMap<Integer, Integer> sous la forme <Nouvelle plateforme, Ancienne plateforme>. Cela permet de tr\`es facilement associer les diff\'erents noeuds. Pour finir, on supprime l'ancienne plateforme et on lie les demi-plateformes entre elles, selon le noeud.
+Une fois le graphe modifié, on vérifie que tous les chemins respectent la contrainte de temps total de transport. Si ce n'est pas le cas, l'arc entre la plateforme gauche et la plateforme droite inclue dans le chemin est supprimé.
+
+Puisqu'on supprime les plateformes d'origine, il est impossible de savoir à quel plateforme d'origine correspond une plateforme gauche ou une plateforme droite. Il est donc nécessaire de créer une table associative sous la forme d'une HashMap qui à chaque nouvelle plateforme associe l'ancienne plateforme.
 
 \subsection{La cr\'eation d'une solution initiale}
 
-Cet algorithme permet de g\'en\'erer une solution de d\'epart en remplissant le premier arc de chaque mini-plateforme. La r\'eponse \`a la demande n'est pas garantie par cet algorithme.
+La génération d'une solution initial s'effectue en 2 étapes.
 
-\subsection{Un diagramme de flot maximal : Trouver rapidement un chemin d'am\'elioration}
-Cet algorithme permet de remplir les derni\`eres demandes dans le cas o\`u l'algorithme de la solution initiale n'avait pas tout r\'egl\'e.
-Gr\^ace \`a un DFS associ\'e aux flux, l'algorithme va trouver le meilleur chemin \`a remplir pour maximiser le flux.
-Il ajoute pour cela une source et une cible qui permettent d'avoir un r\'eel diagramme de flot.
+D'abord le remplissage arbitraires d'arcs jusqu'à leur maximum. Pour cela, tous les chemins fournisseur-plateforme gauche-plateforme droite-client sont remplis au maximum jusqu'à ce que toute la demande soit remplie, ou bien jusqu'à ce qu'on arrive à la fin des chemins.
+
+Si toute la demande n'a pas pu être totalement remplie, on ajoute une source et une cible au graphe et un DFS est lancé sur le graphe résiduel pour trouver des chemins d'amélioration. Comme la taille du problème est variable, on ne recherche pas le meilleur chemin d'amélioration, mais le 1er que l'on trouve, afin d'éviter de tout parcourir. Pour la même raison, nous avons décidé d'implémenter un DFS procédural et non récursif pour éviter un overflow de la pile. 
+
+Si on n'arrive pas à un flot permettant de répondre à toute la demande, alors le problème est insoluble.
 
 \subsection{Un diagramme de flot maximal \`a co\^ut maximal}
 
@@ -352,9 +360,9 @@ Pour cet algorithme, nous n'avons pas besoin de source et de cible car l'algorit
 
 \`A partir de cette solution, on va chercher \`a l'am\'eliorer en cherchant les cycles n\'egatifs comme nous avions d\'ecid\'e de le faire dans la premi\`ere partie. En revanche, l'ajout unitaire de produits, pour chaque cycle, risque d'\^etre tr\`es lent car certains arcs ont une capicit\'e tr\`es importante avec une demande aussi importante.
 
-Nous avons donc d\'ecid\'e de r\'ecup\'erer la capacit\'e maximale du cycle et de calculer le graphe r\'esiduel correspondant. \`A chaque it\'eration, l'algorithme v\'erifie qu'il y a des cycles n\'egatifs et que le temps maximal n'est pas atteint.
+Nous avons donc d\'ecid\'e de r\'ecup\'erer la capacit\'e maximale du cycle et de calculer le graphe r\'esiduel correspondant. \`A chaque it\'eration, l'algorithme v\'erifie qu'il y a des cycles n\'egatifs et que le temps maximal de calcul n'est pas atteint.
 
-Lorsqu'un co\^ut est n\'egatif, le cycle est consid\'er\'e comme n\'egatif. On ajoute et soustraie alors les diff\'erents changements de flot de produits. Puis on recommence une it\'eration si le temps imparti n'est pas termin\'e.
+Lorsqu'un co\^ut est n\'egatif, le cycle est consid\'er\'e comme n\'egatif. On ajoute et soustraie alors les diff\'erents changements de flot de produits. Puis on recommence une it\'eration si il reste du temps.
 
 \subsubsection{La recherche de cycles}
 
@@ -364,15 +372,23 @@ On lance un DFS r\'ecursif, on cr\'ee une liste de noeuds candidats et une liste
 
 Ensuite, on enl\`eve tous les cycles qui sont trouv\'es plusieurs fois \`a cause du d\'ecalage. Enfin, on inverse l'ordre de chaque cycle.
 
-Cette impl\'ementation \'etant en r\'ecursif, elle est tr\`es puissante mais tr\`es gourmande en ressource. Ainsi, pour les graphes de 20 noeuds et plus, le dfs met \'enorm\'ement de temps \`a se faire. Une it\'eration est donc grandement augment\'ee.
+Cette impl\'ementation \'etant en r\'ecursif, elle est tr\`es puissante mais tr\`es gourmande en ressource. Ainsi, pour les graphes de 20 noeuds et plus, le DFS met \'enorm\'ement de temps \`a se faire. Le temps d'une it\'eration est donc grandement augment\'ee.
 
 \subsubsection{La prise en compte des co\^uts fixes}
 
 Le principe du co\^ut fixe est l'ajout d'un co\^ut suppl\'ementaire d'un arc d\`es que ce dernier est utilis\'e, m\^eme pour un produit. Notre but est donc de minimiser le nombre d'arcs utilis\'es afin d'\'eviter des co\^uts trop importants.
 
-Pour prendre compte les co\^ut fixes, il suffit d'ajouter, dans le calcul du co\^ut d'un cycle, une condition afin d'ajouter ou de soustraire au co\^ut total le prix fixe de l'arc (lignes 584 \`a 590).
+Pour prendre compte les co\^ut fixes, il suffit d'ajouter, dans le calcul du co\^ut d'un cycle, une condition afin d'ajouter ou de soustraire au co\^ut total le prix fixe de l'arc.
+
+\subsection{Le temps de calcul}
+
+Comme on ne peut pas laisser tourner l'algorithme indéfiniement, un temps maximum de calcul est donné en paramètre au programme. De plus, pour plus de précision, nous avons indiqué le temps que chaque étape prend pour s'effectuer : la lecture de fichier, la création d'une solution initial (qui prend en compte la séparation des plateformes), l'amélioration de la solution.
+
+Quel que soit le temps imparti, les 2 premières étapes sont toujours remplies afin que le programme retourne toujours au moins une solution. Si il reste du temps, on améliore la solution initiale. Comme pour la lecture de fichier et l'initialisation, une itération d'amélioration ne peut pas être interrompue. Ainsi, le temps total n'est pas forcément égal au temps de calcul imparti.
 
 \section{R\'esultats}
+
+Après avoir mené les tests dont les résultats sont indiqués ci-dessous, nous nous sommes rendus  compte que les algorithmes de solution initial et d'amélioration étaient très longs. Le dédoublement des plateformes augmente en effet énormément la taille du graphe et les DFS sont donc très long. Changer d'algorithme ou trouver un moyen de ne pas dédoubler les plateformes seraient des moyens de palier à ce problème.
 
 \begin{center}
  \begin{tabular}{r | c | c}
