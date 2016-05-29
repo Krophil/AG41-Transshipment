@@ -1,0 +1,415 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{changepage}
+\usepackage[frenchb]{babel} % adopte les règles de typographie franÃ§aise
+\usepackage{libertine}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric}
+\usepackage{float}
+\usepackage{listings}
+\renewcommand{\familydefault}{\sfdefault}
+\renewcommand{\Frlabelitemi}{$\bullet$}
+\renewcommand{\Frlabelitemii}{$\circ$}
+\renewcommand{\Frlabelitemiii}{*}
+
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{\fill}
+	{\huge\bfseries AG41\\[0.3cm]}
+	{\LARGE\bfseries PROJET D'OPTIMISATION EXACTE\\}
+	{\LARGE\bfseries Problème de transbordement\\[0.5cm]}
+	{\Large\itshape Esia Belbachir, Pierre Brunet de Monthélie\\[0.5cm]}
+    {\large P2016\\[1cm]}
+\vspace*{\fill}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\listoffigures
+\newpage
+
+\section{Analyse mathématique}
+
+\subsection{Paramètres}
+
+\begin{description}
+ \item[$V$] Ensemble des noeuds du graphe tel que $V = C \cup F \cup P$
+  \item[$C$] Ensemble des noeuds clients tel que $\forall i \in C, b_i > 0$
+ \item[$P$] Ensemble des noeuds plateformes tel que $\forall i \in P, b_i = 0$
+ \item[$F$] Ensemble des noeuds fournisseurs tel que $\forall i \in F, b_i < 0$
+ \item[$A$] Ensemble des arcs orientés $e = (i,j) \in V^2$ tel que tous les fournisseurs ont un arcs vers toutes les plateformes et toutes les plateformes ont un arc vers tous les clients :\\
+ $\forall (i,j) \in A, \mbox{ alors } (i \in C \mbox{ et }j \in P) \mbox{ ou }(i \in P\mbox{ et }j \in C)$
+ \item[$b_i$] Quantité de produits demandée par le noeud $i \in V$ \\ $\sum\limits_{i \in V} b_i = 0$
+ \item[$g_i$] Coût de transbordement unitaire de la plateforme $i \in P$
+ \item[$s_i$] Temps de transbordement de la plateforme $i \in P$
+ \item[$u_{ij}$] Capacité de l'arc $(i,j) \in A$
+ \item[$c_{ij}$] Coût fixe d'utilisation de l'arc $(i,j) \in A$ si cet arc transporte des produits
+ \item[$h_{ij}$] Coût unitaire de transport de l'arc $(i,j) \in A$
+ \item[$t_{ij}$] Temps de transport de l'arc $(i,j) \in A$
+ \item[$T$] Délai maximum pour acheminer tous les produits
+\end{description}
+
+\subsubsection{Remarques}
+
+\begin{itemize}
+ \item $C\cap F\cap C = \varnothing$
+ \item $\forall i \in V, b_i$ est égale à la différence entre la quantité de produits qui doit rentrer et la quantité de produits qui doit sortir du noeud $i$
+\end{itemize}
+
+
+\subsection{Variables}
+
+\begin{description}
+ \item[$x_{ij}$] Quantité de produits transportés sur l'arc $(i,j) \in A$
+ \item[$x_{ijk}$] Quantité de produits transportés sur l'arc $(i,j)$ puis sur l'arc $(j,k)$ avec $i \in F$, $j \in P$ et $k \in C$ \\
+ $(i,j,k)$ représente le chemin emprunté par un paquet de $x$ produits
+ \item[$y_{ij}$] Valeur binaire égale à  $1$ si l'arc $(i,j) \in A$ est utilisé pour transporter des produits, $0$ sinon
+ \item[$y_{ijk}$] Valeur binaire égale à  $1$ si le chemin $(i,j,k) \in F\times P \times C$ est utilisé pour transporter un paquet de produits, $0$ sinon \\
+ Si $(i,j)$ et $(j,k)$ sont utilisés, mais pas pour le même paquet, $y_{ijk}$ est égal à $0$
+\end{description}
+
+\subsection{Fonction objectif}
+
+$\min z = \sum \limits_{(i,j) \in F\times P} y_{ij} ( c_{ij} + x_{ij} (h_{ij} + g_i)) + \sum \limits_{(i,j) \in P \times C} y_{ij} (x_{ij} h _{ij}  + c_{ij})$
+
+\subsection{Contraintes}
+
+
+\begin{tabular}{r l}
+ Temps & $\forall (i,j,k) \in (F\times P\times C), y_{ijk}(t_{ij} + t_{jk} + s_i) \leqslant T$ \\
+ Capacité & $\forall (i,j) \in A, x_{ij} \leqslant u_{ij}$ \\
+ Conservation & $\forall j \in V, \sum \limits_{\substack {k \in V \\ (j,k) \in A}} x_{jk} + \sum \limits_{\substack {i \in V \\ (i,j) \in A}} x_{ij} = b_i$ \\
+ Relation variables & $\forall (i,j) \in F\times P, x_{ij} = \sum\limits_{k \in C} x_{ijk}$\\
+  &$\forall (j,k) \in F\times P, x_{jk} = \sum\limits_{i \in F} x_{ijk}$\\
+  &$\forall (i,j) \in A \mbox{ si } x_{ij} > 0, \mbox{ alors } y_{ij} = 1$ \\
+  &$\forall (i,j,k) \in F \times P \times C, \mbox{ si } x_{ijk} > 0, \mbox{ alors } y_{ijk} = y_{ij} = y_{jk} = 1$
+ 
+\end{tabular}
+
+\subsection{Représentation graphique}
+
+\begin{figure}[H]
+    \begin{center}
+        \begin{tikzpicture}[scale=1.5]
+        \tikzstyle{every node}=[ellipse, draw]
+        \foreach \i in {1,...,3}
+        {
+            \path (2,\i*2) node (v\i) {Dépôt};
+            \path (4,\i*2) node (w\i) {Plateforme};
+            \path (6,\i*2) node (x\i) {Client};
+        }
+            
+        \foreach \i in {1,...,3}
+        {
+            \foreach \j in {1,...,3}
+            {
+                \draw (v\i) -- (w\j);
+                \draw (w\i) -- (x\j);
+            }
+        }
+        \end{tikzpicture}
+    \caption{Représentation du problème}
+    \end{center}
+\end{figure}
+
+\section{Questionnement et algorithmes}
+
+En mettant en évidence les contraintes et les variables, nous avons identifié des caractéristiques permettant de fractionner et de simplifier le problème considéré.
+
+
+\subsection{Un problème de temps}
+Dans notre analyse mathématique, nous avons inclu la contrainte temporelle de la manière suivant : tout paquet de taille $y$ passant par les noeuds $i$,$j$ et $k$ doit être acheminé dans un temps inférieur à une limite $T$. Afin de remplir cette contrainte, nous avons adapté la représentation graphique de ce problème de la manière suivante : chaque noeud plateforme est remplacé par un graphe biparti entre les arcs entrants et les arcs sortants. 
+
+
+\begin{figure}[H]
+    \begin{center}
+        \begin{tikzpicture}[scale=2]
+        \tikzstyle{every node}=[ellipse, draw];
+            \foreach \i in {1,...,3}
+            {
+                \path (2,\i) node (v\i) {$e_\i$};
+                \path (4,\i) node (w\i) {$s_\i$};
+            }
+                
+            \foreach \i in {1,...,3}
+            {
+                \foreach \j in {1,...,3}
+                {
+                    \draw (v\i) -- (w\j);
+                }
+            }
+            \foreach \j in {1,...,3}
+            {
+                \draw [dashed] (0, \j) -- (v\j);
+                \draw [dashed] (w\j) -- (6, \j);
+            }
+            \fill[white] (0,0.9) rectangle (0.75,3.1);
+            \fill[white] (5.5,0.9) rectangle (6.5,3.1);
+        \end{tikzpicture}
+    \end{center}
+    \caption{Décomposition d'une plateforme avec 3 dépôts et 3 clients}
+\end{figure}
+ 
+Pour chaque noeud plateforme $i$ :
+\begin{itemize}
+    \item Caractéristique des noeuds créés $j$ :
+        \begin{itemize}
+            \item $b_j = 0$
+        \end{itemize}
+    \item Caractéristiques des arcs créés $(j,k)$ :
+        \begin{itemize}
+            \item $t_{jk} = s_i$
+            \item $h_{jk} = g_i$
+            \item $c_{jk} = 0$
+            \item Si le chemin d'un fournisseur à un client enpruntant l'arc $(j,k)$ a un temps total de transport supérieur à $T$, $u_{jk} = 0$ \\
+            Sinon, $u_{jk} = + \infty$
+        \end{itemize}
+\end{itemize}
+
+En représentant le problème ainsi, on peut ``ignorer'' la contrainte de temps puisqu'elle est intégrée dans la structure même du graphe.
+
+
+\subsection{Un problème de flot maximal à coût minimum}
+
+Une fois la contrainte de temps mise de côté, on constate que le problème proposé est en fait un problème de flux maximal à coût minimum.
+
+\subsubsection{Flot maximal}
+
+En ajoutant un noeud source et un noeud cible au graphe, on se retrouve face à un problème de flux maximal classique.
+
+\begin{figure}[H]
+    \begin{center}
+        \begin{tikzpicture}[scale=1.5]
+            \tikzstyle{every node}=[ellipse, draw];
+            \path[red] (0, 4) node (s) {source};
+            \path[red] (8, 4) node (t) {cible};
+            \foreach \i in {1,...,3}
+            {
+                \path (2,\i*2) node (v\i) {Dépôt};
+                \path (4,\i*2) node (w\i) {Plateforme};
+                \path (6,\i*2) node (x\i) {Client};
+            }
+                
+            \foreach \i in {1,...,3}
+            {
+                \draw[red] (s) -- (v\i);
+                \draw[red] (x\i) -- (t);
+                \foreach \j in {1,...,3}
+                {
+                    \draw (v\i) -- (w\j);
+                    \draw (w\i) -- (x\j);
+                }
+            }
+        \end{tikzpicture}
+    \end{center}
+    \caption{Ajout de la source et de la cible sur le graphe pour faciliter le traitement}
+\end{figure}
+
+Pour résoudre ce problème, nous pouvons utiliser l'algorithme de Edmonds-Karp, implémentation de la méthode de Ford-Fulkerson. Il repose sur la recherche d'un chemin d'amélioration dans le graph résiduel.
+
+Soient $c(u,v)$ la capacité de l'arc $(u,v)$ et $f(u,v)$ le flot de $(u,v)$.
+
+\begin{verbatim}
+dfs(G, u)
+DEBUT
+    POUR u dans V
+        Marquer u
+        POUR tous les noeuds v dans noeudsAdjacents(u)
+            SI v n'est pas marqué
+                dfs(G, v)
+            FIN SI
+        FIN POUR
+    FIN POUR
+FIN
+\end{verbatim}
+
+\begin{verbatim}
+fordFulkerson(G)
+DEBUT
+    POUR (u,v) dans Arcs(G)
+        f(u,v) = 0
+        Marquer s
+        TANT QUE il existe une chaîne améliorante µ
+            fluxDir = min(c(u,v)-f(u,v)), 
+                        où u est un arc direct de µ
+            fluxInd = min(f(u,v)),
+                        où u est un arc indirect de µ
+            flux = min(fluxDir, fluxInd)
+            POUR (u,v) dans ArcsDirects(µ)
+                f(u,v) = f(u,v) + flux
+            FIN POUR
+            POUR (u,v) dans ArcsIndirects(µ)
+                f(u,v) = f(u,v) - flux
+            FIN POUR
+        FIN TANT QUE
+    FIN POUR
+FIN
+\end{verbatim}
+
+
+La complexité est égale à $m^2*n$ avec $m$ le nombre d'arcs et $n$ le nombre de noeuds.
+
+\subsubsection{Coût minimum}
+
+Le problème de flux à coût minimum présenté ici est plus complexe que les problèmes de flux à coût minimum classiques car les arcs possèdent dans notre cas un coût unitaire et un coût fixe.
+
+Nous avons alors décidé de calculer le coût unitaire à partir de la moyenne des coûts unitaire et fixe selon la capacité de l'arc.
+
+Par exemple, pour une capacité de $n$ produits, on aurait :
+\begin{equation*}
+    \frac{c_{moyen} = n*c_{unitaire}+c_{fixe}}{n}
+\end{equation*}
+
+Une solution usuelle d'un problème de flux à coût minimum est de chercher un cycle négatif dans le graphe résiduel des coûts. En utilisant les coûts moyens comme coûts unitaires, on peut utiliser cette méthode.
+
+Une autre possibilité serait de résoudre le problème avec, tout d'abord, les coûts unitaires. On aurait alors une solution basé sur la quantité de produits. Ensuite, on améliorerait cette solution avec les coûts fixes.
+
+\begin{lstlisting}[
+mathescape,
+ columns=fullflexible,
+ basicstyle=\fontfamily{lmvtt}\selectfont,
+ escapeinside=::,
+ ]
+DEBUT
+    Initialement, $\phi = (0, ..., 0) ; G_{\phi}^{e} = R$
+    FAIRE
+        trouver C un chemin de co:\^u:t minimal de s :à: p dans le graphe d'
+        $\delta = min (r_{ij}) (avec r_{ij} = c_{ij} - \phi_{ij} )$
+            $(i,j) \in C$
+        POUR tout arc u = (i, j) de C FAIRE
+            SI (i, j) arc du graphe
+                FAIRE $\phi (u) = \phi (u) + \delta$
+            SINON
+                SI (j, i) arc du graphe, $\phi (u) = \phi (u) - \delta$
+                    modifier le graphe d':é:cart $G_\phi^e$
+                FIN SI
+            FIN SINON
+            FIN SI
+        FIN POUR
+    TANT QUE il existe un chemin de s :à: p dans $G_\phi^e$
+FIN
+\end{lstlisting}
+
+\section{Résumé}
+
+Afin de résoudre le problème proposé, nous avons segmenté sa résolution en 3 sous-problèmes : temps, flot  maximal et coût minimum. 
+
+Les 2 premiers sont nécessaires à l'obtention d'une solution qui remplit les contraintes, le dernier permet d'améliorer la solution générée. 
+
+Pour trouver une solution, le temps minimum de calcul est donc celui de la construction du graphe et de la résolution du problème de flot maximal selon les méthodes expliquées plus haut. 
+
+Ensuite, plus on laissera le programme s'exécuter longtemps, plus la solution sera bonne, jusqu'à atteindre la solution optimale.
+
+La complexité de ce programme est égale à la somme des complexités des différents algorithmes utilisés.
+
+\section{Implémentation}
+
+Pour pouvoir impl\'ementer notre algorithme, nous nous avons d\'ecid\'e de cr\'eer notre propre structure de donn\'ees afin de simplifier les diff\'erentes m\'ethodes dont nous avions besoin. La s\'eparation des plateformes a ainsi \'et\'e directement prise en compte dans la structure et a permis de m\'emoriser les diff\'erents noeuds utiles \`a la bonne marche de l'algorithme.
+
+L'algorithme est cod\'e en Java, nous avons utilis\'e les HashMaps et les LinkedLists.
+
+\subsection{La cr\'eation d'une structure de donn\'ees}
+
+\subsubsection{Le Graphe : une classe g\'en\'erique}
+
+La classe Graph est une classe g\'en\'erique, cela permet de faire un graphe dynamique qui pourra \^etre utilis\'e pour diff\'erents type d'arcs et de noeuds. Cette classe ne contient aucune donn\'ee. Elle permet simplement de stocker les identifiants dans des HashMaps. Ensuite, ce sont les classes Nodes et Edges qui prennent le relais.
+
+\subsubsection{Les Nodes et les Edges}
+
+Les Nodes gardent le minimum d'informations possibles. Elles se composent de plusieurs attributs tels que la demande, le co\^ut et le temps de transbordement pour les plateformes.
+
+De plus, l'attribut parent est utilis\'e dans le DFS permettant de g\'en\'erer tous les cycles d'un graphes. Il est utilis\'e pour remonter jusqu'au parent cr\'eant le cycle.
+
+\subsection{La s\'eparation des plateformes}
+
+La s\'eparation des plateformes permet de prendre en compte la contrainte de temps. Pour la mettre en place en Java, on r\'ecup\`ere tous les noeuds dont la demande est \'egale \`a 0. On trouve le prochain identifiant que l'on donne comme cl\'e au noeud. 
+Enfin, avec plusieurs boucles, il suffit de g\'en\'erer tous les arcs li\'es aux noeuds plateformes. La r\'epartition des donn\'ees est indiqu\'ee dans la premi\`ere partie de ce compte-rendu.
+
+De plus, dans cette partie, nous avons supprim\'e tous les chemins dont la capacité \'etait \'egale \`a 0 afin de faciliter l'ex\'ecution.
+
+Enfin, pour m\'emoriser ces plateformes et pouvoir les refusionner \`a la fin de l'am\'elioration de la solution, on les ajoute \`a une HashMap<Integer, Integer> sous la forme <Nouvelle plateforme, Ancienne plateforme>. Cela permet de tr\`es facilement associer les diff\'erents noeuds. Pour finir, on supprime l'ancienne plateforme et on lie les demi-plateformes entre elles, selon le noeud.
+
+\subsection{La cr\'eation d'une solution initiale}
+
+Cet algorithme permet de g\'en\'erer une solution de d\'epart en remplissant le premier arc de chaque mini-plateforme. La r\'eponse \`a la demande n'est pas garantie par cet algorithme.
+
+\subsection{Un diagramme de flot maximal : Trouver rapidement un chemin d'am\'elioration}
+Cet algorithme permet de remplir les derni\`eres demandes dans le cas o\`u l'algorithme de la solution initiale n'avait pas tout r\'egl\'e.
+Gr\^ace \`a un DFS associ\'e aux flux, l'algorithme va trouver le meilleur chemin \`a remplir pour maximiser le flux.
+Il ajoute pour cela une source et une cible qui permettent d'avoir un r\'eel diagramme de flot.
+
+\subsection{Un diagramme de flot maximal \`a co\^ut maximal}
+
+Pour cet algorithme, nous n'avons pas besoin de source et de cible car l'algorithme circule \`a partir de l'ensemble des d\'ep\^ots. De plus, la source et la cible sont d\'esormais inutile car, leur capacit\'e \'etant \'egale au d\'ep\^ot ou au client qui leur est associ\'e, ils sont d\'ej\`a charg\'e au maximum. On enl\`eve donc ces deux noeuds \`a la fin de l'algorithme pr\'ec\'edent.
+
+\`A partir de cette solution, on va chercher \`a l'am\'eliorer en cherchant les cycles n\'egatifs comme nous avions d\'ecid\'e de le faire dans la premi\`ere partie. En revanche, l'ajout unitaire de produits, pour chaque cycle, risque d'\^etre tr\`es lent car certains arcs ont une capicit\'e tr\`es importante avec une demande aussi importante.
+
+Nous avons donc d\'ecid\'e de r\'ecup\'erer la capacit\'e maximale du cycle et de calculer le graphe r\'esiduel correspondant. \`A chaque it\'eration, l'algorithme v\'erifie qu'il y a des cycles n\'egatifs et que le temps maximal n'est pas atteint.
+
+Lorsqu'un co\^ut est n\'egatif, le cycle est consid\'er\'e comme n\'egatif. On ajoute et soustraie alors les diff\'erents changements de flot de produits. Puis on recommence une it\'eration si le temps imparti n'est pas termin\'e.
+
+\subsubsection{La recherche de cycles}
+
+Pour trouver tous les cycles d'un graphe, plusieurs m\'ethodes sont possibles. Nous avons d\'ecid\'e d'utiliser le DFS car c'est la m\'ethode nous semblant la plus logique et la plus concr\`ete.
+
+On lance un DFS r\'ecursif, on cr\'ee une liste de noeuds candidats et une liste de noeuds d\'ecouverts. Si un noeud est trouv\'e une deuxi\`eme fois et s'il fait partie de la liste des candidats, on remonte jusqu'\`a ce qu'on trouve un noeud parent \'egale \`a ce m\^eme noeud.
+
+Ensuite, on enl\`eve tous les cycles qui sont trouv\'es plusieurs fois \`a cause du d\'ecalage. Enfin, on inverse l'ordre de chaque cycle.
+
+Cette impl\'ementation \'etant en r\'ecursif, elle est tr\`es puissante mais tr\`es gourmande en ressource. Ainsi, pour les graphes de 20 noeuds et plus, le dfs met \'enorm\'ement de temps \`a se faire. Une it\'eration est donc grandement augment\'ee.
+
+\subsubsection{La prise en compte des co\^uts fixes}
+
+Le principe du co\^ut fixe est l'ajout d'un co\^ut suppl\'ementaire d'un arc d\`es que ce dernier est utilis\'e, m\^eme pour un produit. Notre but est donc de minimiser le nombre d'arcs utilis\'es afin d'\'eviter des co\^uts trop importants.
+
+Pour prendre compte les co\^ut fixes, il suffit d'ajouter, dans le calcul du co\^ut d'un cycle, une condition afin d'ajouter ou de soustraire au co\^ut total le prix fixe de l'arc (lignes 584 \`a 590).
+
+\section{R\'esultats}
+
+\begin{center}
+ \begin{tabular}{r | c | c}
+\textbf{Fichier} & \textbf{R\'esultat} & \textbf{Temps} \\ \hline
+transshipment1.txt & 212.0 & 5.397s \\
+transshipment2.txt & pb dans la lecture du fichier & \\
+tshp006-01.txt & pb dans la lecture du fichier & \\
+tshp10-01.txt & 3940.5911509852026 & 0.02s \\
+tshp10-02.txt & pb dans la lecture du fichier & \\
+tshp010-01.txt & 4756.506448083509 & 157.089s \\
+tshp010-02.txt & 2126.9661327456147 & 1.856s \\
+tshp010-03.txt & 1951.8313355932821 & 0.079s \\
+tshp010-04.txt & 2114.3288184684357 & 0.888s \\
+tshp010-05.txt & 2866.751823637155 & 1.253s \\
+tshp020-01.txt & 4573.544241371602 & stopp\'e au bout de 20 min \\
+tshp020-02.txt & 7128.861258575862 & stopp\'e au bout de 20 min \\
+tshp020-03.txt & 9662.086844423093 & stopp\'e au bout de 20 min \\
+tshp020-04.txt & & arrêté au bout de 20 min \\
+tshp020-05.txt & & \\
+tshp050-01.txt & & \\
+tshp050-02.txt & & \\
+tshp050-03.txt & & \\
+tshp050-04.txt & & \\
+tshp050-05.txt & & \\
+tshp100-01.txt & & \\
+tshp100-02.txt & & \\
+tshp100-03.txt & & \\
+tshp100-04.txt & & \\
+tshp100-05.txt & & \\
+tshp500-01.txt & & \\
+tshp500-02.txt & & \\
+tshp500-03.txt & & \\
+tshp500-04.txt & & \\
+tshp500-05.txt & & \\
+  
+ \end{tabular}
+
+\end{center}
+
+\end{document}
