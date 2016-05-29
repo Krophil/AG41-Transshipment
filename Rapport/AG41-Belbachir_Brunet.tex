@@ -391,7 +391,7 @@ Quel que soit le temps imparti, les 2 premières étapes sont toujours remplies 
 Après avoir mené les tests dont les résultats sont indiqués ci-dessous, nous nous sommes rendus  compte que les algorithmes de solution initial et d'amélioration étaient très longs. Le dédoublement des plateformes augmente en effet énormément la taille du graphe et les DFS sont donc très long. Changer d'algorithme ou trouver un moyen de ne pas dédoubler les plateformes seraient des moyens de palier à ce problème.
 
 \begin{center}
- \begin{tabular}{r | c | c}
+ \begin{tabular}{r | c | l}
 \textbf{Fichier} & \textbf{R\'esultat} & \textbf{Temps} \\ \hline
 transshipment1.txt & 212.0 & 5.397s \\
 transshipment2.txt & pb dans la lecture du fichier & \\
@@ -406,23 +406,30 @@ tshp010-05.txt & 2866.751823637155 & 1.253s \\
 tshp020-01.txt & 4573.544241371602 & stopp\'e au bout de 20 min \\
 tshp020-02.txt & 7128.861258575862 & stopp\'e au bout de 35 min \\
 tshp020-03.txt & 9662.086844423093 & stopp\'e au bout de 60 min \\
-tshp020-04.txt & 11159.946168444236 & arrêté au bout de 20 min \\
-tshp020-05.txt & & \\
-tshp050-01.txt & & \\
-tshp050-02.txt & & \\
-tshp050-03.txt & & \\
-tshp050-04.txt & & \\
-tshp050-05.txt & & \\
-tshp100-01.txt & & \\
-tshp100-02.txt & & \\
-tshp100-03.txt & & \\
-tshp100-04.txt & & \\
-tshp100-05.txt & & \\
-tshp500-01.txt & & \\
-tshp500-02.txt & & \\
-tshp500-03.txt & & \\
-tshp500-04.txt & & \\
-tshp500-05.txt & & \\
+tshp020-04.txt & 11159.946168444236 & stopp\'e au bout de 45 min \\
+tshp020-05.txt & 11683.402761321786 &  \\
+tshp050-01.txt & 18267.737819422495 & stopp\'e au bout de 45 min (Attention : la demande \\
+& & n'est pas statisfaite : manquent 14 produits/230) \\
+tshp050-02.txt & 17314.81989053033 & stopp\'e au bout de 30 min (Attention : la demande \\
+& & n'est pas statisfaite : manquent 27 produits/218) \\
+tshp050-03.txt & 10176.322729872461 & stopp\'e au bout de 30 min \\
+tshp050-04.txt & 21131.564098532177 & stopp\'e au bout de 20 min \\
+tshp050-05.txt & 19060.701180329823 & stopp\'e au bout de 20 min \\
+tshp100-01.txt & 45838.598997389054 & stopp\'e au bout de 30 min (Attention : la demande \\
+& & n'est pas statisfaite : manquent 41 produits/488) \\
+tshp100-02.txt & 47376.39000754389 & stopp\'e au bout de 20 min (Attention : la demande \\
+& & n'est pas statisfaite : manquent 4 produits/497) \\
+tshp100-03.txt & 35390.43760148906 & stopp\'e au bout de 20 min (Attention : la demande \\
+& & n'est pas statisfaite : manquent 103 produits/460) \\
+tshp100-04.txt & 19945.698281503657 & La demande n'est pas statisfaite : manquent \\
+& & 119 produits/498 : infaisable \\
+tshp100-05.txt & 25741.323007876163 & La demande n'est pas statisfaite : manquent \\
+& & 121 produits/474 : infaisable \\
+tshp500-01.txt & 212217.19965555932 & manquent 280 produits/2506 \\
+tshp500-02.txt & \o{} & Infaisable \\
+tshp500-03.txt & \o{} & Infaisable \\
+tshp500-04.txt & \o{} & Infaisable \\
+tshp500-05.txt & \o{} & Infaisable \\
   
  \end{tabular}
 
