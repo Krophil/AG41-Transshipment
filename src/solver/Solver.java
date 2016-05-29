@@ -75,7 +75,8 @@ public class Solver {
 		System.out.println("FINDING AN INITIAL SOLUTION--------------------------------------------------");
         int leftdemand = fillEdges(separatePlatforms());
         System.out.println("Remaining demand not yet answered : " + leftdemand);
-        leftdemand = maxFlow(leftdemand);
+		System.out.println("Total Cost before ameliorating : " + getTotalCost());
+		leftdemand = maxFlow(leftdemand);
         if (leftdemand > 0) {
         	System.out.println("Cannot meet demand : unanswered demand : " + leftdemand);
         	return -1;
